@@ -19,28 +19,28 @@ fn main() {
     let command = &args[1];
 
     match command.as_str() {
-        "create_election" => {
-            if args.len() != 7 {
-                println!("Usage: zk-stark-voting create_election <election_name> <secret> <a> <e> <merkle_root>");
+        "create_campaign_manager" => {
+            if args.len() != 6 {
+                println!("Usage: zk-stark-voting create_campaign_manager <election_name> <secret> <a> <e>");
                 return;
             }
             let election_name = &args[2];
             let secret = BaseElement::new(args[3].parse().unwrap());
             let a = BaseElement::new(args[4].parse().unwrap());
             let e = BaseElement::new(args[5].parse().unwrap());
-            let merkle_root = BaseElement::new(args[6].parse().unwrap());
 
             let lwe = ToyLWE::new();
             let pk = lwe.generate_keys(secret, a, e);
 
-            fs::create_dir_all(format!("{}/voters", election_name)).unwrap();
+            fs::create_dir_all(format!("{}/voters_secrets", election_name)).unwrap();
+            fs::create_dir_all(format!("{}/voters_public_keys", election_name)).unwrap();
             fs::create_dir_all(format!("{}/votes", election_name)).unwrap();
 
-            let campaign_data = format!("{}\n{}\n{}", pk.a.as_int(), pk.b.as_int(), merkle_root.as_int());
-            fs::write(format!("{}/campaign.txt", election_name), campaign_data).unwrap();
+            let keys_data = format!("{}\n{}", pk.a.as_int(), pk.b.as_int());
+            fs::write(format!("{}/campaign_keys.txt", election_name), keys_data).unwrap();
 
-            println!("Election '{}' created successfully.", election_name);
-            println!("Campaign parameters saved to {}/campaign.txt", election_name);
+            println!("Campaign Manager created successfully for election '{}'.", election_name);
+            println!("Campaign keys saved to {}/campaign_keys.txt", election_name);
         }
         "create_voter" => {
             if args.len() != 4 {
@@ -55,13 +55,78 @@ fn main() {
             let since_the_epoch = start
                 .duration_since(UNIX_EPOCH)
                 .expect("Time went backwards");
-            let secret: u64 = since_the_epoch.as_millis() as u64;
+            let secret = BaseElement::new(since_the_epoch.as_millis() as u128);
+            let public_key = Vote::derive_public_key(secret);
 
-            let path = format!("{}/voters/{}.txt", election_name, voter_name);
-            fs::write(&path, secret.to_string()).unwrap();
+            let secret_path = format!("{}/voters_secrets/{}.txt", election_name, voter_name);
+            let pk_path = format!("{}/voters_public_keys/{}.txt", election_name, voter_name);
+
+            fs::write(&secret_path, secret.as_int().to_string()).unwrap();
+            fs::write(&pk_path, public_key.as_int().to_string()).unwrap();
 
             println!("Voter '{}' created in election '{}'.", voter_name, election_name);
-            println!("Secret saved to {}", path);
+            println!("Secret saved to {}", secret_path);
+            println!("Public key saved to {}", pk_path);
+        }
+        "generate_merkle_root" => {
+            if args.len() != 3 {
+                println!("Usage: zk-stark-voting generate_merkle_root <election_name>");
+                return;
+            }
+            let election_name = &args[2];
+
+            let keys_path = format!("{}/campaign_keys.txt", election_name);
+            let keys_str = match fs::read_to_string(&keys_path) {
+                Ok(s) => s,
+                Err(_) => {
+                    println!("Error: Could not read campaign keys at {}", keys_path);
+                    return;
+                }
+            };
+
+            // Read voter public keys
+            let voters_dir = format!("{}/voters_public_keys", election_name);
+            let paths = match fs::read_dir(&voters_dir) {
+                Ok(p) => p,
+                Err(_) => {
+                    println!("Error: Could not read voter public keys directory at {}", voters_dir);
+                    return;
+                }
+            };
+
+            use zk_stark_voting::voting::crypto::HashFn;
+            use winter_crypto::{Digest, ElementHasher};
+
+            let mut paths_vec: Vec<_> = paths.map(|res| res.unwrap().path()).collect();
+            paths_vec.sort();
+
+            let mut combined_hash = HashFn::hash_elements(&[BaseElement::ZERO]);
+            let mut voter_count = 0;
+
+            for path in paths_vec {
+                if path.is_file() {
+                    if let Ok(pk_str) = fs::read_to_string(&path) {
+                        if let Ok(pk_val) = pk_str.trim().parse::<u128>() {
+                            let pk_element = BaseElement::new(pk_val);
+                            // Simple linear hash chain to simulate Merkle Root
+                            let elements = [BaseElement::new(combined_hash.as_bytes()[0] as u128), pk_element];
+                            combined_hash = HashFn::hash_elements(&elements);
+                            voter_count += 1;
+                        }
+                    }
+                }
+            }
+
+            // The resulting hash's first bytes as a field element will act as our simulated root
+            let merkle_root_element = BaseElement::new(
+                u128::from_le_bytes(combined_hash.as_bytes()[0..16].try_into().unwrap()) % BaseElement::MODULUS
+            );
+
+            let campaign_data = format!("{}\n{}", keys_str.trim(), merkle_root_element.as_int());
+            fs::write(format!("{}/campaign.txt", election_name), campaign_data).unwrap();
+
+            println!("Merkle Root generated using {} voter public keys.", voter_count);
+            println!("Campaign fully configured. Saved to {}/campaign.txt", election_name);
         }
         "vote" => {
             if args.len() != 5 {
@@ -72,7 +137,7 @@ fn main() {
             let voter_name = &args[3];
             let choice_idx: usize = args[4].parse().unwrap();
 
-            let voter_secret_path = format!("{}/voters/{}.txt", election_name, voter_name);
+            let voter_secret_path = format!("{}/voters_secrets/{}.txt", election_name, voter_name);
             let secret_str = match fs::read_to_string(&voter_secret_path) {
                 Ok(s) => s,
                 Err(_) => {
@@ -245,8 +310,9 @@ fn main() {
 
 fn print_usage() {
     println!("Usage:");
-    println!("  zk-stark-voting create_election <election_name> <secret> <a> <e> <merkle_root>");
+    println!("  zk-stark-voting create_campaign_manager <election_name> <secret> <a> <e>");
     println!("  zk-stark-voting create_voter <election_name> <voter_name>");
+    println!("  zk-stark-voting generate_merkle_root <election_name>");
     println!("  zk-stark-voting vote <election_name> <voter_name> <choice_idx>");
     println!("  zk-stark-voting tally <election_name> <cm_secret>");
     println!("  zk-stark-voting simulate");

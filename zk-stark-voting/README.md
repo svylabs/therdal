@@ -67,28 +67,35 @@ cargo run -- simulate
 ### CLI Usage (File-Based)
 The project includes a file-based CLI to simulate a real election flow.
 
-**1. Create an Election**
-Generates Campaign Manager keys and configures the election directories.
+**1. Create a Campaign Manager**
+Initializes the election directories and generates the Campaign Manager keys.
 ```bash
-cargo run -- create_election <election_name> <cm_secret> <a> <e> <merkle_root>
-# Example: cargo run -- create_election usa_2024 12345 98765 3 424242
+cargo run -- create_campaign_manager <election_name> <cm_secret> <a> <e>
+# Example: cargo run -- create_campaign_manager usa_2024 12345 98765 3
 ```
 
 **2. Register a Voter**
-Generates a secret identity for a voter.
+Generates a secret identity for a voter. This simulates generating a voter public key.
 ```bash
 cargo run -- create_voter <election_name> <voter_name>
 # Example: cargo run -- create_voter usa_2024 alice
 ```
 
-**3. Cast a Vote**
+**3. Generate Merkle Root**
+Aggregates all the registered voters in the election directory to compute a Merkle Root, officially opening the campaign.
+```bash
+cargo run -- generate_merkle_root <election_name>
+# Example: cargo run -- generate_merkle_root usa_2024
+```
+
+**4. Cast a Vote**
 Homomorphically encrypts a choice (0-9) and generates a STARK proof.
 ```bash
 cargo run -- vote <election_name> <voter_name> <choice_idx>
 # Example: cargo run -- vote usa_2024 alice 5
 ```
 
-**4. Tally the Votes**
+**5. Tally the Votes**
 Aggregates all valid votes in the election's folder and decrypts the final results.
 ```bash
 cargo run -- tally <election_name> <cm_secret>
