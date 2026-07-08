@@ -75,15 +75,6 @@ fn main() {
             }
             let election_name = &args[2];
 
-            let keys_path = format!("{}/campaign_keys.txt", election_name);
-            let keys_str = match fs::read_to_string(&keys_path) {
-                Ok(s) => s,
-                Err(_) => {
-                    println!("Error: Could not read campaign keys at {}", keys_path);
-                    return;
-                }
-            };
-
             // Read voter public keys
             let voters_dir = format!("{}/voters_public_keys", election_name);
             let paths = match fs::read_dir(&voters_dir) {
@@ -122,11 +113,41 @@ fn main() {
                 u128::from_le_bytes(combined_hash.as_bytes()[0..16].try_into().unwrap()) % BaseElement::MODULUS
             );
 
-            let campaign_data = format!("{}\n{}", keys_str.trim(), merkle_root_element.as_int());
-            fs::write(format!("{}/campaign.txt", election_name), campaign_data).unwrap();
+            fs::write(format!("{}/merkle_root.txt", election_name), merkle_root_element.as_int().to_string()).unwrap();
 
             println!("Merkle Root generated using {} voter public keys.", voter_count);
-            println!("Campaign fully configured. Saved to {}/campaign.txt", election_name);
+            println!("Merkle root saved to {}/merkle_root.txt", election_name);
+        }
+        "create_election" => {
+            if args.len() != 3 {
+                println!("Usage: zk-stark-voting create_election <election_name>");
+                return;
+            }
+            let election_name = &args[2];
+
+            let keys_path = format!("{}/campaign_keys.txt", election_name);
+            let keys_str = match fs::read_to_string(&keys_path) {
+                Ok(s) => s,
+                Err(_) => {
+                    println!("Error: Could not read campaign keys at {}. Did you run create_campaign_manager?", keys_path);
+                    return;
+                }
+            };
+
+            let root_path = format!("{}/merkle_root.txt", election_name);
+            let root_str = match fs::read_to_string(&root_path) {
+                Ok(s) => s,
+                Err(_) => {
+                    println!("Error: Could not read merkle root at {}. Did you run generate_merkle_root?", root_path);
+                    return;
+                }
+            };
+
+            let campaign_data = format!("{}\n{}", keys_str.trim(), root_str.trim());
+            fs::write(format!("{}/campaign.txt", election_name), campaign_data).unwrap();
+
+            println!("Election '{}' created successfully.", election_name);
+            println!("Official campaign parameters saved to {}/campaign.txt", election_name);
         }
         "vote" => {
             if args.len() != 5 {
@@ -313,6 +334,7 @@ fn print_usage() {
     println!("  zk-stark-voting create_campaign_manager <election_name> <secret> <a> <e>");
     println!("  zk-stark-voting create_voter <election_name> <voter_name>");
     println!("  zk-stark-voting generate_merkle_root <election_name>");
+    println!("  zk-stark-voting create_election <election_name>");
     println!("  zk-stark-voting vote <election_name> <voter_name> <choice_idx>");
     println!("  zk-stark-voting tally <election_name> <cm_secret>");
     println!("  zk-stark-voting simulate");

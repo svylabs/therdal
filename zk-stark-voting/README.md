@@ -82,20 +82,27 @@ cargo run -- create_voter <election_name> <voter_name>
 ```
 
 **3. Generate Merkle Root**
-Aggregates all the registered voters in the election directory to compute a Merkle Root, officially opening the campaign.
+Aggregates all the registered voters in the election directory to compute a Merkle Root.
 ```bash
 cargo run -- generate_merkle_root <election_name>
 # Example: cargo run -- generate_merkle_root usa_2024
 ```
 
-**4. Cast a Vote**
+**4. Create an Election**
+Combines the Campaign Manager public keys and the Merkle root to officially open the election.
+```bash
+cargo run -- create_election <election_name>
+# Example: cargo run -- create_election usa_2024
+```
+
+**5. Cast a Vote**
 Homomorphically encrypts a choice (0-9) and generates a STARK proof.
 ```bash
 cargo run -- vote <election_name> <voter_name> <choice_idx>
 # Example: cargo run -- vote usa_2024 alice 5
 ```
 
-**5. Tally the Votes**
+**6. Tally the Votes**
 Aggregates all valid votes in the election's folder and decrypts the final results.
 ```bash
 cargo run -- tally <election_name> <cm_secret>

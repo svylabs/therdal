@@ -5,7 +5,7 @@
 The voting CLI operates on an election-specific folder structure. All keys, parameters, and votes are stored in files within an election's directory to simulate real-world data persistence.
 
 ### 1. `create_campaign_manager`
-- **Description:** Initializes a new election, creating the required directory structure and generating the Campaign Manager's public and private keys.
+- **Description:** Initializes the required directory structure and generates the Campaign Manager's public and private keys.
 - **Inputs:**
   - `election_name`: The name of the election (used as the folder name).
   - `cm_secret`: The secret integer for the Campaign Manager.
@@ -29,16 +29,24 @@ The voting CLI operates on an election-specific folder structure. All keys, para
   - Writes the public key to `./<election_name>/voters_public_keys/<voter_name>.txt`.
 
 ### 3. `generate_merkle_root`
-- **Description:** Finalizes the voter registration by reading all voter public keys and compiling them into a Merkle root to complete the campaign configuration.
+- **Description:** Finalizes the voter registration by reading all voter public keys and compiling them into a Merkle root.
 - **Inputs:**
   - `election_name`: The name of the election.
 - **Expected Behavior:**
   - Reads all voter public keys from `./<election_name>/voters_public_keys`.
   - Hashes them sequentially to simulate a Merkle tree generation.
-  - Reads `./<election_name>/campaign_keys.txt`.
-  - Writes `cm_pub_a`, `cm_pub_b`, and the computed `merkle_root` to `./<election_name>/campaign.txt`.
+  - Writes the computed `merkle_root` to `./<election_name>/merkle_root.txt`.
 
-### 4. `vote`
+### 4. `create_election`
+- **Description:** Configures the actual election by combining the Campaign Manager's public keys and the generated Merkle root into the official campaign configuration.
+- **Inputs:**
+  - `election_name`: The name of the election.
+- **Expected Behavior:**
+  - Reads `cm_pub_a` and `cm_pub_b` from `./<election_name>/campaign_keys.txt`.
+  - Reads `merkle_root` from `./<election_name>/merkle_root.txt`.
+  - Writes all three values to `./<election_name>/campaign.txt`.
+
+### 5. `vote`
 - **Description:** Casts a vote by homomorphically encrypting the candidate choice. It reads the voter's secret and the campaign parameters from files, and writes the resulting ciphertext to a file.
 - **Inputs:**
   - `election_name`: The name of the election.
@@ -50,7 +58,7 @@ The voting CLI operates on an election-specific folder structure. All keys, para
   - Homomorphically encrypts the choice using the CM's public keys.
   - Writes the resulting ciphertext (`u` and `v` arrays) to `./<election_name>/votes/<voter_name>.txt`.
 
-### 5. `tally`
+### 6. `tally`
 - **Description:** Aggregates all submitted encrypted votes from the votes directory and decrypts the final tally using the Campaign Manager's secret key.
 - **Inputs:**
   - `election_name`: The name of the election.
