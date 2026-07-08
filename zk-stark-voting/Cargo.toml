@@ -1,0 +1,15 @@
+[package]
+name = "zk-stark-voting"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rand = "0.10.2"
+sha3 = "0.12.0"
+thiserror = "2.0.18"
+winter-crypto = "0.13.1"
+winter-math = "0.13.1"
+winter-prover = "0.13.1"
+winter-utils = "0.13.1"
+winter-verifier = "0.13.1"
+winterfell = "0.13.1"
