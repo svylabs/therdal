@@ -26,17 +26,21 @@ fn main() {
             }
             let election_name = &args[2];
 
-            use std::time::{SystemTime, UNIX_EPOCH};
-            let start = SystemTime::now();
-            let since_the_epoch = start
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards");
-            let seed = since_the_epoch.as_millis() as u128;
+            use rand::rngs::OsRng;
+            use rand::RngCore;
 
-            // Generate a small secret to prevent LWE noise from overwhelming the message during decryption
-            let secret = BaseElement::new((seed % 10000) + 1);
-            let a = BaseElement::new(456);
-            let e = BaseElement::new(1); // very small error to prevent toy decryption failures
+            let mut rng = OsRng;
+
+            // Generate a small secret using CSPRNG to prevent LWE noise from overwhelming the message during decryption
+            // The constraint is due to ToyLWE. In production, parameter sizes would be large.
+            let secret_val = (rng.next_u32() % 10000) + 1;
+            let secret = BaseElement::new(secret_val as u128);
+
+            let a_val = (rng.next_u32() % 1000) + 1;
+            let a = BaseElement::new(a_val as u128);
+
+            let e_val = (rng.next_u32() % 3) + 1; // very small error to prevent toy decryption failures
+            let e = BaseElement::new(e_val as u128);
 
             let lwe = ToyLWE::new();
             let pk = lwe.generate_keys(secret, a, e);
@@ -63,12 +67,14 @@ fn main() {
             let election_name = &args[2];
             let voter_name = &args[3];
 
-            use std::time::{SystemTime, UNIX_EPOCH};
-            let start = SystemTime::now();
-            let since_the_epoch = start
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards");
-            let secret = BaseElement::new(since_the_epoch.as_millis() as u128);
+            use rand::rngs::OsRng;
+            use rand::RngCore;
+
+            let mut rng = OsRng;
+
+            // Generate a 64-bit secret using CSPRNG
+            let secret_val = rng.next_u64();
+            let secret = BaseElement::new(secret_val as u128);
             let public_key = Vote::derive_public_key(secret);
 
             let secret_path = format!("{}/voters_secrets/{}.txt", election_name, voter_name);

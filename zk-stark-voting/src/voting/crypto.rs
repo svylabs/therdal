@@ -30,6 +30,20 @@ pub struct LwePublicKey {
     pub b: BaseElement,
 }
 
+/// A toy implementation of Learning With Errors (LWE) for demonstration purposes.
+///
+/// **Security Assumptions & Production Requirements:**
+/// This implementation operates over a small prime field (`BaseElement`) and uses
+/// simple scalar values. It does NOT provide cryptographic security.
+///
+/// To be production-ready and provide 128-bit (or higher) security against quantum
+/// attacks, a real LWE or Ring-LWE scheme must be used with appropriately sized parameters:
+/// - **Lattice Dimension ($n$):** Typically $n \ge 512$ or $1024$.
+/// - **Modulus ($q$):** A sufficiently large modulus, often multi-word.
+/// - **Error Distribution ($\chi$):** A discrete Gaussian or similar distribution
+///   with standard deviation $\sigma$ tuned for the desired security level.
+/// - **Key Size:** Public and private keys are large vectors/polynomials, usually
+///   several kilobytes in size, rather than single field elements.
 pub struct ToyLWE {
     pub delta: BaseElement,
 }
