@@ -33,7 +33,8 @@ fn main() {
                 .expect("Time went backwards");
             let seed = since_the_epoch.as_millis() as u128;
 
-            let secret = BaseElement::new(seed);
+            // Generate a small secret to prevent LWE noise from overwhelming the message during decryption
+            let secret = BaseElement::new((seed % 10000) + 1);
             let a = BaseElement::new(456);
             let e = BaseElement::new(1); // very small error to prevent toy decryption failures
 
