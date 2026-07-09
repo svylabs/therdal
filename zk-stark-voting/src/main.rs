@@ -336,9 +336,7 @@ fn main() {
 
             println!("Campaign Manager decrypted the final tally!");
             for (i, tally) in final_tally.iter().enumerate() {
-                if *tally != BaseElement::ZERO {
-                    println!("Votes for Candidate {}: {}", i, tally);
-                }
+                println!("Votes for Candidate {}: {}", i, tally);
             }
         }
         "simulate" => {
