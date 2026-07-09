@@ -25,6 +25,12 @@ impl Vote {
         let v3 = v * v * v;
         v3 + BaseElement::new(42)
     }
+
+    pub fn derive_public_key(secret: BaseElement) -> BaseElement {
+        // Simple public key derivation for simulation
+        let s2 = secret * secret;
+        s2 + BaseElement::new(777)
+    }
 }
 
 #[cfg(test)]

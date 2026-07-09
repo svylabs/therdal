@@ -57,10 +57,59 @@ If this prototype were to move to production, the following tasks must be comple
    - *Task:* Port the Verifier and Homomorphic Aggregation logic from Rust to a Smart Contract (e.g., Solidity on Ethereum) to ensure censorship-resistant decentralized tallying.
 
 ## Running the Prototype
-To run the end-to-end tallying simulation:
+
+### End-to-End Simulation
+To run the original self-contained end-to-end tallying simulation without managing files:
 ```bash
-cargo run
+cargo run -- simulate
 ```
+
+### CLI Usage (File-Based)
+The project includes a file-based CLI to simulate a real election flow.
+
+**1. Create a Campaign Manager**
+Initializes the election directories and automatically generates the Campaign Manager keys and configuration parameters.
+```bash
+cargo run -- create_campaign_manager <election_name>
+# Example: cargo run -- create_campaign_manager usa_2024
+```
+
+**2. Register a Voter**
+Generates a secret identity for a voter. This simulates generating a voter public key.
+```bash
+cargo run -- create_voter <election_name> <voter_name>
+# Example: cargo run -- create_voter usa_2024 alice
+```
+
+**3. Generate Merkle Root**
+Aggregates all the registered voters in the election directory to compute a Merkle Root.
+```bash
+cargo run -- generate_merkle_root <election_name>
+# Example: cargo run -- generate_merkle_root usa_2024
+```
+
+**4. Create an Election**
+Combines the Campaign Manager public keys and the Merkle root to officially open the election.
+```bash
+cargo run -- create_election <election_name>
+# Example: cargo run -- create_election usa_2024
+```
+
+**5. Cast a Vote**
+Homomorphically encrypts a choice (0-9) and generates a STARK proof.
+```bash
+cargo run -- vote <election_name> <voter_name> <choice_idx>
+# Example: cargo run -- vote usa_2024 alice 5
+```
+
+**6. Tally the Votes**
+Aggregates all valid votes in the election's folder and decrypts the final results using the stored Campaign Manager secret.
+```bash
+cargo run -- tally <election_name>
+# Example: cargo run -- tally usa_2024
+```
+
+### Running Tests
 To run the mathematical unit tests:
 ```bash
 cargo test
