@@ -20,14 +20,22 @@ fn main() {
 
     match command.as_str() {
         "create_campaign_manager" => {
-            if args.len() != 6 {
-                println!("Usage: zk-stark-voting create_campaign_manager <election_name> <secret> <a> <e>");
+            if args.len() != 3 {
+                println!("Usage: zk-stark-voting create_campaign_manager <election_name>");
                 return;
             }
             let election_name = &args[2];
-            let secret = BaseElement::new(args[3].parse().unwrap());
-            let a = BaseElement::new(args[4].parse().unwrap());
-            let e = BaseElement::new(args[5].parse().unwrap());
+
+            use std::time::{SystemTime, UNIX_EPOCH};
+            let start = SystemTime::now();
+            let since_the_epoch = start
+                .duration_since(UNIX_EPOCH)
+                .expect("Time went backwards");
+            let seed = since_the_epoch.as_millis() as u128;
+
+            let secret = BaseElement::new(seed);
+            let a = BaseElement::new(456);
+            let e = BaseElement::new(1); // very small error to prevent toy decryption failures
 
             let lwe = ToyLWE::new();
             let pk = lwe.generate_keys(secret, a, e);
@@ -36,10 +44,14 @@ fn main() {
             fs::create_dir_all(format!("{}/voters_public_keys", election_name)).unwrap();
             fs::create_dir_all(format!("{}/votes", election_name)).unwrap();
 
+            let secret_data = format!("{}", secret.as_int());
+            fs::write(format!("{}/campaign_manager_secret.txt", election_name), secret_data).unwrap();
+
             let keys_data = format!("{}\n{}", pk.a.as_int(), pk.b.as_int());
             fs::write(format!("{}/campaign_keys.txt", election_name), keys_data).unwrap();
 
             println!("Campaign Manager created successfully for election '{}'.", election_name);
+            println!("Campaign Manager secret saved to {}/campaign_manager_secret.txt", election_name);
             println!("Campaign keys saved to {}/campaign_keys.txt", election_name);
         }
         "create_voter" => {
@@ -252,12 +264,21 @@ fn main() {
             println!("  Encrypted vote saved to {}", vote_path);
         }
         "tally" => {
-            if args.len() != 4 {
-                println!("Usage: zk-stark-voting tally <election_name> <cm_secret>");
+            if args.len() != 3 {
+                println!("Usage: zk-stark-voting tally <election_name>");
                 return;
             }
             let election_name = &args[2];
-            let cm_secret = BaseElement::new(args[3].parse().unwrap());
+
+            let cm_secret_path = format!("{}/campaign_manager_secret.txt", election_name);
+            let secret_str = match fs::read_to_string(&cm_secret_path) {
+                Ok(s) => s,
+                Err(_) => {
+                    println!("Error: Could not read Campaign Manager secret at {}", cm_secret_path);
+                    return;
+                }
+            };
+            let cm_secret = BaseElement::new(secret_str.trim().parse().unwrap());
 
             let votes_dir = format!("{}/votes", election_name);
             let paths = match fs::read_dir(&votes_dir) {
@@ -331,12 +352,12 @@ fn main() {
 
 fn print_usage() {
     println!("Usage:");
-    println!("  zk-stark-voting create_campaign_manager <election_name> <secret> <a> <e>");
+    println!("  zk-stark-voting create_campaign_manager <election_name>");
     println!("  zk-stark-voting create_voter <election_name> <voter_name>");
     println!("  zk-stark-voting generate_merkle_root <election_name>");
     println!("  zk-stark-voting create_election <election_name>");
     println!("  zk-stark-voting vote <election_name> <voter_name> <choice_idx>");
-    println!("  zk-stark-voting tally <election_name> <cm_secret>");
+    println!("  zk-stark-voting tally <election_name>");
     println!("  zk-stark-voting simulate");
 }
 

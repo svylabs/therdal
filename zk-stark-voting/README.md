@@ -68,10 +68,10 @@ cargo run -- simulate
 The project includes a file-based CLI to simulate a real election flow.
 
 **1. Create a Campaign Manager**
-Initializes the election directories and generates the Campaign Manager keys.
+Initializes the election directories and automatically generates the Campaign Manager keys and configuration parameters.
 ```bash
-cargo run -- create_campaign_manager <election_name> <cm_secret> <a> <e>
-# Example: cargo run -- create_campaign_manager usa_2024 12345 98765 3
+cargo run -- create_campaign_manager <election_name>
+# Example: cargo run -- create_campaign_manager usa_2024
 ```
 
 **2. Register a Voter**
@@ -103,10 +103,10 @@ cargo run -- vote <election_name> <voter_name> <choice_idx>
 ```
 
 **6. Tally the Votes**
-Aggregates all valid votes in the election's folder and decrypts the final results.
+Aggregates all valid votes in the election's folder and decrypts the final results using the stored Campaign Manager secret.
 ```bash
-cargo run -- tally <election_name> <cm_secret>
-# Example: cargo run -- tally usa_2024 12345
+cargo run -- tally <election_name>
+# Example: cargo run -- tally usa_2024
 ```
 
 ### Running Tests

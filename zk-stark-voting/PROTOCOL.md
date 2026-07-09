@@ -5,16 +5,14 @@
 The voting CLI operates on an election-specific folder structure. All keys, parameters, and votes are stored in files within an election's directory to simulate real-world data persistence.
 
 ### 1. `create_campaign_manager`
-- **Description:** Initializes the required directory structure and generates the Campaign Manager's public and private keys.
+- **Description:** Initializes the required directory structure and automatically generates the Campaign Manager's public and private LWE keys along with the necessary parameters (`a` and `e`).
 - **Inputs:**
   - `election_name`: The name of the election (used as the folder name).
-  - `cm_secret`: The secret integer for the Campaign Manager.
-  - `a`: An integer element `a` for LWE generation.
-  - `e`: An error integer `e` for LWE generation.
 - **Expected Behavior:**
+  - Generates pseudo-random values for the Campaign Manager's secret, LWE parameter `a`, and LWE error term `e`.
   - Creates directory `./<election_name>`.
-  - Creates directory `./<election_name>/voters`.
-  - Creates directory `./<election_name>/votes`.
+  - Creates directories for voters and votes.
+  - Writes the secret to `./<election_name>/campaign_manager_secret.txt`.
   - Writes `cm_pub_a` and `cm_pub_b` to `./<election_name>/campaign_keys.txt`.
 
 ### 2. `create_voter`
@@ -62,9 +60,9 @@ The voting CLI operates on an election-specific folder structure. All keys, para
 - **Description:** Aggregates all submitted encrypted votes from the votes directory and decrypts the final tally using the Campaign Manager's secret key.
 - **Inputs:**
   - `election_name`: The name of the election.
-  - `cm_secret`: The Campaign Manager's secret key.
 - **Expected Behavior:**
+  - Reads the Campaign Manager's secret from `./<election_name>/campaign_manager_secret.txt`.
   - Iterates through all files in `./<election_name>/votes/`.
   - Parses each file as an LWE vector ciphertext and adds it to an aggregated ciphertext.
-  - Decrypts the aggregated ciphertext using `cm_secret`.
+  - Decrypts the aggregated ciphertext using the secret.
   - Outputs the final integer tally for each candidate to the console.
