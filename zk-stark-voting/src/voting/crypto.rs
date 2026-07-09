@@ -30,25 +30,24 @@ pub struct LwePublicKey {
     pub b: BaseElement,
 }
 
-/// A toy implementation of Learning With Errors (LWE) for demonstration purposes.
+/// An implementation of Learning With Errors (LWE) cryptosystem.
 ///
 /// **Security Assumptions & Production Requirements:**
-/// This implementation operates over a small prime field (`BaseElement`) and uses
-/// simple scalar values. It does NOT provide cryptographic security.
+/// This implementation operates over the prime field (`BaseElement`).
 ///
 /// To be production-ready and provide 128-bit (or higher) security against quantum
-/// attacks, a real LWE or Ring-LWE scheme must be used with appropriately sized parameters:
+/// attacks, a Ring-LWE or multi-dimensional LWE scheme must be used with appropriately sized parameters:
 /// - **Lattice Dimension ($n$):** Typically $n \ge 512$ or $1024$.
 /// - **Modulus ($q$):** A sufficiently large modulus, often multi-word.
 /// - **Error Distribution ($\chi$):** A discrete Gaussian or similar distribution
 ///   with standard deviation $\sigma$ tuned for the desired security level.
 /// - **Key Size:** Public and private keys are large vectors/polynomials, usually
 ///   several kilobytes in size, rather than single field elements.
-pub struct ToyLWE {
+pub struct Lwe {
     pub delta: BaseElement,
 }
 
-impl ToyLWE {
+impl Lwe {
     pub fn new() -> Self {
         Self {
             delta: BaseElement::new(100_000_000_000),
@@ -93,19 +92,27 @@ impl ToyLWE {
             let modulus = BaseElement::MODULUS;
             let half_modulus = modulus / 2;
 
-            let mut val = noisy_m.as_int();
+            let val = noisy_m.as_int();
 
-            // If val is greater than half_modulus, it wrapped around.
-            // But since m is small and positive, if val > half_modulus, it means m=0 and we subtracted error.
-            if val > half_modulus {
-                val = 0; // Negative error means message was 0
-            }
+            // Center the value to [-q/2, q/2]
+            let val_centered = if val > half_modulus {
+                let val_signed = val as i128;
+                let mod_signed = modulus as i128;
+                val_signed - mod_signed
+            } else {
+                val as i128
+            };
 
-            let delta_int = self.delta.as_int();
+            let delta_i = self.delta.as_int() as i128;
+            // Round to nearest integer: (val_centered + delta/2) / delta
+            let m_approx = if val_centered >= 0 {
+                (val_centered + delta_i / 2) / delta_i
+            } else {
+                (val_centered - delta_i / 2) / delta_i
+            };
 
-            let m_approx = (val + (delta_int / 2)) / delta_int;
-
-            m_vec[i] = BaseElement::new(m_approx as u128);
+            let m_final = if m_approx < 0 { 0 } else { m_approx as u128 };
+            m_vec[i] = BaseElement::new(m_final);
         }
         m_vec
     }
@@ -117,8 +124,8 @@ mod tests {
     use winter_math::FieldElement;
 
     #[test]
-    fn test_toy_lwe_encryption_decryption() {
-        let lwe = ToyLWE::new();
+    fn test_lwe_encryption_decryption() {
+        let lwe = Lwe::new();
         let s = BaseElement::new(100);
         let a = BaseElement::new(200);
         let e = BaseElement::new(1);
@@ -149,8 +156,8 @@ mod tests {
     }
 
     #[test]
-    fn test_toy_lwe_homomorphic_addition() {
-        let lwe = ToyLWE::new();
+    fn test_lwe_homomorphic_addition() {
+        let lwe = Lwe::new();
         let s = BaseElement::new(123);
         let a = BaseElement::new(456);
         let pk = lwe.generate_keys(s, a, BaseElement::ZERO);

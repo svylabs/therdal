@@ -8,7 +8,7 @@ use winter_prover::{
 use winterfell::{AuxRandElements, PartitionOptions, TraceInfo};
 
 use crate::voting::air::{NUM_CANDIDATES, TRACE_WIDTH, VoterAir, VoterPublicInputs};
-use crate::voting::crypto::{HashFn, LwePublicKey, LweVectorCiphertext, ToyLWE};
+use crate::voting::crypto::{HashFn, LwePublicKey, LweVectorCiphertext, Lwe};
 use crate::voting::types::Vote;
 
 type VectorCommitment = MerkleTree<HashFn>;
@@ -33,7 +33,7 @@ impl VoterProver {
         e1: &[BaseElement; NUM_CANDIDATES],
         e2: &[BaseElement; NUM_CANDIDATES],
         _public_key: &LwePublicKey,
-        _lwe: &ToyLWE,
+        _lwe: &Lwe,
         ciphertext: &LweVectorCiphertext,
         nullifier: BaseElement,
     ) -> TraceTable<BaseElement> {

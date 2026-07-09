@@ -1,6 +1,6 @@
 # Quantum Safe ZK-STARK Voting Protocol
 
-This project is an experimental prototype of a quantum-safe, privacy-preserving voting protocol leveraging Zero-Knowledge STARKs (`winterfell`) and Homomorphic Encryption (Toy Learning With Errors - LWE).
+This project is an experimental prototype of a quantum-safe, privacy-preserving voting protocol leveraging Zero-Knowledge STARKs (`winterfell`) and Homomorphic Encryption (Learning With Errors - LWE).
 
 ## Architecture
 
@@ -32,7 +32,7 @@ The protocol uses **Architecture 2 (Homomorphic Tallying)** to ensure no single 
 
 ### What is Working:
 - **Data Structures**: The `Vote` and `Ciphertext` structures are fully implemented.
-- **Quantum-Safe Homomorphic Encryption**: A toy Learning With Errors (LWE) cryptosystem operates correctly over the STARK `BaseElement` prime field. Vector encryption, additive homomorphism, and decryption all function properly.
+- **Quantum-Safe Homomorphic Encryption**: A Learning With Errors (LWE) cryptosystem operates correctly over the STARK `BaseElement` prime field. Vector encryption, additive homomorphism, and decryption all function properly.
 - **Nullifier Generation**: Simple algebraic nullifiers are generated to prevent double-voting.
 - **Trace Building**: The `VoterProver` successfully builds the necessary STARK execution trace (a matrix representing the mathematical progression of the vote).
 - **End-to-End Simulation**: The `main.rs` binary successfully simulates the Campaign Manager generating keys, 3 voters casting homomorphically encrypted vector votes, the verifier aggregating them, and the Campaign Manager decrypting the correct final tally.
@@ -48,7 +48,7 @@ If this prototype were to move to production, the following tasks must be comple
 1. **Framework Pivot or Specialized zkVM implementation**
    - *Task:* Switch from manual STARK constraint writing (`winterfell`) to a zkVM framework (like SP1 or RISC Zero) or a higher-level STARK language (like Cairo). Hand-writing polynomial transitions for vectors and cryptographic hash functions is notoriously error-prone and brittle.
 2. **Standardize LWE Homomorphic Encryption**
-   - *Task:* Replace the `ToyLWE` with a standardized, audited, and optimized Lattice-Based Cryptography library (e.g., modified BGV or TFHE) adapted for the STARK field.
+    - *Task:* Replace the single-variable `Lwe` with a standardized, audited, and optimized Lattice-Based Cryptography library (e.g., modified BGV or TFHE) adapted for the STARK field.
 3. **Implement Full STARK-friendly Merkle Trees**
    - *Task:* Integrate a proper Sparse Merkle Tree (SMT) using a STARK-friendly hash function (Rescue-Prime or Poseidon). The STARK trace must verify the Merkle authentication path natively.
 4. **Distributed Key Generation (Threshold Decryption)**

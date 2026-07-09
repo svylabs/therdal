@@ -3,7 +3,7 @@ use std::fs;
 use winter_math::{fields::f128::BaseElement, FieldElement, StarkField};
 use winterfell::{ProofOptions, FieldExtension};
 
-use zk_stark_voting::voting::crypto::{ToyLWE, LweVectorCiphertext, NUM_CANDIDATES};
+use zk_stark_voting::voting::crypto::{Lwe, LweVectorCiphertext, NUM_CANDIDATES};
 use zk_stark_voting::voting::types::Vote;
 use zk_stark_voting::voting::prover::VoterProver;
 use zk_stark_voting::voting::air::VoterPublicInputs;
@@ -32,17 +32,17 @@ fn main() {
             let mut rng = OsRng;
 
             // Generate a small secret using CSPRNG to prevent LWE noise from overwhelming the message during decryption
-            // The constraint is due to ToyLWE. In production, parameter sizes would be large.
+            // In production, parameter sizes would be large.
             let secret_val = (rng.next_u32() % 10000) + 1;
             let secret = BaseElement::new(secret_val as u128);
 
             let a_val = (rng.next_u32() % 1000) + 1;
             let a = BaseElement::new(a_val as u128);
 
-            let e_val = (rng.next_u32() % 3) + 1; // very small error to prevent toy decryption failures
+            let e_val = (rng.next_u32() % 3) + 1; // very small error to prevent decryption failures
             let e = BaseElement::new(e_val as u128);
 
-            let lwe = ToyLWE::new();
+            let lwe = Lwe::new();
             let pk = lwe.generate_keys(secret, a, e);
 
             fs::create_dir_all(format!("{}/voters_secrets", election_name)).unwrap();
@@ -206,7 +206,7 @@ fn main() {
             let cm_pub_b = BaseElement::new(lines[1].parse().unwrap());
             let merkle_root = BaseElement::new(lines[2].parse().unwrap());
 
-            let lwe = ToyLWE::new();
+            let lwe = Lwe::new();
             let cm_pub_key = zk_stark_voting::voting::crypto::LwePublicKey {
                 a: cm_pub_a,
                 b: cm_pub_b,
@@ -229,7 +229,7 @@ fn main() {
                 // Simple pseudo-randomness derived from time and voter secret for demo
                 seed = seed.wrapping_add(voter_secret.as_int() as u128).wrapping_mul(1234567891);
 
-                // Ensure small noise for ToyLWE to avoid decryption failures
+                // Ensure small noise to avoid decryption failures
                 r[j] = BaseElement::new((seed % 99 + 1) as u128);
                 seed = seed.wrapping_mul(987654321);
                 e1[j] = BaseElement::new((seed % 9 + 1) as u128);
@@ -337,7 +337,7 @@ fn main() {
 
             println!("Aggregated {} votes.", vote_count);
 
-            let lwe = ToyLWE::new();
+            let lwe = Lwe::new();
             let final_tally = lwe.decrypt_vector(&aggregated_tally, cm_secret);
 
             println!("Campaign Manager decrypted the final tally!");
@@ -370,7 +370,7 @@ fn run_simulation() {
     println!("--- Quantum Safe ZK-STARK Voting Protocol ---");
     println!("--- LWE Homomorphic Tallying for {} Candidates ---", NUM_CANDIDATES);
 
-    let lwe = ToyLWE::new();
+    let lwe = Lwe::new();
 
     let cm_secret = BaseElement::new(123456789);
     let cm_a = BaseElement::new(987654321);

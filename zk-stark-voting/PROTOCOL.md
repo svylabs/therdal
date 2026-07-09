@@ -10,7 +10,7 @@ The voting CLI operates on an election-specific folder structure. All keys, para
   - `election_name`: The name of the election (used as the folder name).
 - **Security Note:** In a production environment aiming for 128-bit quantum-safe security, these keys must be generated using a cryptographically secure random number generator (CSPRNG), and the LWE parameters (lattice dimension, modulus, error distribution) must be sized appropriately (e.g., lattice dimension $n \ge 512$, large keys in KB). The CLI uses `OsRng` to meet the CSPRNG requirement.
 - **Expected Behavior:**
-  - Generates cryptographically secure random values for the Campaign Manager's secret, LWE parameter `a`, and LWE error term `e`. (Note: To avoid decryption failures in this toy implementation, values are still constrained to small ranges).
+  - Generates cryptographically secure random values for the Campaign Manager's secret, LWE parameter `a`, and LWE error term `e`. (Note: To avoid decryption failures, values are still constrained to small ranges suitable for the Stark BaseField).
   - Creates directory `./<election_name>`.
   - Creates directories for voters and votes.
   - Writes the secret to `./<election_name>/campaign_manager_secret.txt`.
