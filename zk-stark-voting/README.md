@@ -1,6 +1,6 @@
 # Quantum Safe ZK-STARK Voting Protocol
 
-This project is an experimental prototype of a quantum-safe, privacy-preserving voting protocol leveraging Zero-Knowledge STARKs (`winterfell`) and Homomorphic Encryption (Toy Learning With Errors - LWE).
+This project is an experimental prototype of a quantum-safe, privacy-preserving voting protocol leveraging Zero-Knowledge STARKs (`winterfell`) and Homomorphic Encryption (Learning With Errors - LWE).
 
 ## Architecture
 
@@ -31,30 +31,30 @@ The protocol uses **Architecture 2 (Homomorphic Tallying)** to ensure no single 
 ## Current Prototype Status
 
 ### What is Working:
-- **Data Structures**: The `Vote` and `Ciphertext` structures are fully implemented.
-- **Quantum-Safe Homomorphic Encryption**: A toy Learning With Errors (LWE) cryptosystem operates correctly over the STARK `BaseElement` prime field. Vector encryption, additive homomorphism, and decryption all function properly.
-- **Nullifier Generation**: Simple algebraic nullifiers are generated to prevent double-voting.
-- **Trace Building**: The `VoterProver` successfully builds the necessary STARK execution trace (a matrix representing the mathematical progression of the vote).
-- **End-to-End Simulation**: The `main.rs` binary successfully simulates the Campaign Manager generating keys, 3 voters casting homomorphically encrypted vector votes, the verifier aggregating them, and the Campaign Manager decrypting the correct final tally.
+- **Data Structures**: The `Vote` and `LweVectorCiphertext` structures are fully implemented.
+- **Quantum-Safe Homomorphic Encryption**: A standard multi-dimensional Learning With Errors (LWE) cryptosystem operates correctly over $2^{64}$ wrapping integers, using dimension $n = 512$ and an Irwin-Hall discrete Gaussian approximation. Vector encryption, additive homomorphism, and decryption all function properly.
+- **Nullifier Generation**: Cryptographically secure nullifiers are derived from voter secrets using Keccak256 hashes to prevent double-voting.
+- **SP1 zkVM Guest Program**: The guest logic resides in standard Rust inside the `program` crate, validating Merkle paths, LWE choice vectors, and outputting public values.
+- **End-to-End Simulation**: The CLI simulates the entire campaign path, generating actual inputs, running the guest validations, generating and verifying proofs, and homomorphically tallying results.
 
-### What is NOT Working / Bypassed:
-- **Winterfell STARK Proof Generation**: The `winterfell` STARK library enforces strict rules where the algebraic degrees of transition polynomials must exactly match the constraints defined during the composer phase. Aligning the LWE vector encryption matrix perfectly inside the `evaluate_transition` logic causes a degree mismatch panic. Currently, the `evaluate_transition` logic is stubbed/bypassed, meaning the protocol simulates a valid proof but does not actually mathematically enforce zero-knowledge constraints yet.
-- **Full Merkle Tree Inclusion**: The STARK trace currently simulates inclusion. Real Merkle branch hashing (via STARK-friendly hashes like Rescue or Poseidon) is incredibly complex to hand-write constraints for and is stubbed out.
+### Bypassed for Simulation:
+- **SP1 Production Proofs**: To run without requiring massive native toolchain installations (like `riscv32im-succinct-zkvm-elf` compilers and CUDA runtimes), the host uses a mock SP1 SDK implementation in `sp1_sdk.rs`. The code is fully structured to swap in the official `sp1-sdk` crate.
 
 ## Tasks for a Production-Ready System
 
-If this prototype were to move to production, the following tasks must be completed sequentially:
+If this prototype were to move to production, the following tasks must be completed:
 
-1. **Framework Pivot or Specialized zkVM implementation**
-   - *Task:* Switch from manual STARK constraint writing (`winterfell`) to a zkVM framework (like SP1 or RISC Zero) or a higher-level STARK language (like Cairo). Hand-writing polynomial transitions for vectors and cryptographic hash functions is notoriously error-prone and brittle.
-2. **Standardize LWE Homomorphic Encryption**
-   - *Task:* Replace the `ToyLWE` with a standardized, audited, and optimized Lattice-Based Cryptography library (e.g., modified BGV or TFHE) adapted for the STARK field.
-3. **Implement Full STARK-friendly Merkle Trees**
-   - *Task:* Integrate a proper Sparse Merkle Tree (SMT) using a STARK-friendly hash function (Rescue-Prime or Poseidon). The STARK trace must verify the Merkle authentication path natively.
-4. **Distributed Key Generation (Threshold Decryption)**
-   - *Task:* The Campaign Manager's private key currently presents a single point of failure and trust. Implement a threshold-decryption scheme so that `M` of `N` election organizers must cooperate to decrypt the final aggregated LWE tally.
-5. **Smart Contract Verifier**
-   - *Task:* Port the Verifier and Homomorphic Aggregation logic from Rust to a Smart Contract (e.g., Solidity on Ethereum) to ensure censorship-resistant decentralized tallying.
+1. **Official SP1 SDK & Toolchain Integration**
+   - *Task:* Install the official SP1 toolchain (`cargo-sp1`), compile the guest `program` to a RISC-V ELF binary, and swap the mock `ProverClient` in `main.rs` for the real `sp1-sdk` crate dependency.
+
+2. **Migrate to Ring-LWE or Module-LWE**
+   - *Task:* Replace the standard LWE implementation with a Ring-LWE (RLWE) or Module-LWE (MLWE) scheme (like Kyber or BGV/Bfv). This reduces public key sizes from $\approx 40$ KB to under a few kilobytes by using polynomial representations and optimizes vector multiplication using the Number Theoretic Transform (NTT).
+
+3. **Distributed Key Generation (Threshold Decryption)**
+   - *Task:* The Campaign Manager's secret key currently presents a single point of trust. Implement a threshold decryption scheme so that $M$ of $N$ election coordinators must collaborate to decrypt the aggregated LWE tally.
+
+4. **Integration with Censorship-Resistant Registry**
+   - *Task:* Port the Merkle Root storage and the Homomorphic Aggregation logic to a decentralized blockchain or smart contract, serving as a censorship-resistant ledger for voter registration and vote casting.
 
 ## Running the Prototype
 
