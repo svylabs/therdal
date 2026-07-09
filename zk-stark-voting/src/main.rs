@@ -7,9 +7,13 @@ use serde_json;
 
 use zk_stark_voting::voting::crypto::{Lwe, LwePublicKey, LweVectorCiphertext, NUM_CANDIDATES, LWE_N};
 use zk_stark_voting::voting::types::Vote;
-use zk_stark_voting::voting::sp1_sdk::{ProverClient, SP1Stdin};
+use sp1_sdk::{ProverClient, prelude::SP1Stdin};
 
-fn main() {
+const GUEST_ELF: &[u8] = include_bytes!("../program/elf/riscv32im-succinct-zkvm-elf");
+
+
+#[tokio::main]
+async fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
@@ -208,6 +212,7 @@ fn main() {
 
             // SP1 Prover setup
             let client = ProverClient::new();
+            let (pk, _vk) = client.setup(GUEST_ELF);
             let mut stdin = SP1Stdin::new();
             stdin.write(&voter_secret);
             let choice_idx_u32 = choice_idx as u32;
@@ -218,9 +223,9 @@ fn main() {
             stdin.write(&merkle_indices);
             stdin.write(&seed);
 
-            // Execute mock SP1 zkVM guest program
-            let proof = client.prove(&zk_stark_voting::voting::sp1_sdk::SP1ProverKey, stdin)
-                .run()
+            // Execute SP1 zkVM guest program
+            let proof = client.prove(&pk, stdin)
+                .await
                 .expect("Guest program execution or proving failed!");
 
             // Extract public outputs from the proof
@@ -408,6 +413,7 @@ fn run_simulation() {
 
     let mut submitted_ciphertexts = Vec::new();
     let client = ProverClient::new();
+    let (pk, _vk) = client.setup(GUEST_ELF);
 
     for (i, (&voter_secret, &choice_idx)) in voter_secrets.iter().zip(voter_choices.iter()).enumerate() {
         println!("\n--- Processing Voter {} ---", i + 1);
@@ -439,8 +445,8 @@ fn run_simulation() {
         stdin.write(&indices);
         stdin.write(&seed);
 
-        let proof = client.prove(&zk_stark_voting::voting::sp1_sdk::SP1ProverKey, stdin)
-            .run()
+        let proof = client.prove(&pk, stdin)
+            .await
             .expect("Guest program execution failed");
 
         let mut public_values = proof.public_values;
