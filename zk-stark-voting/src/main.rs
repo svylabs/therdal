@@ -7,9 +7,9 @@ use serde_json;
 
 use zk_stark_voting::voting::crypto::{Lwe, LwePublicKey, LweVectorCiphertext, NUM_CANDIDATES, LWE_N};
 use zk_stark_voting::voting::types::Vote;
-use sp1_sdk::{ProverClient, prelude::SP1Stdin};
+use sp1_sdk::{Prover, ProverClient, prelude::SP1Stdin, include_elf, Elf};
 
-const GUEST_ELF: &[u8] = include_bytes!("../program/elf/riscv32im-succinct-zkvm-elf");
+const GUEST_ELF: Elf = include_elf!("zk-stark-voting-program");
 
 
 #[tokio::main]
@@ -211,8 +211,8 @@ async fn main() {
             rng.fill_bytes(&mut seed);
 
             // SP1 Prover setup
-            let client = ProverClient::new();
-            let (pk, _vk) = client.setup(GUEST_ELF);
+            let client = ProverClient::from_env().await;
+            let pk = client.setup(GUEST_ELF).await.unwrap();
             let mut stdin = SP1Stdin::new();
             stdin.write(&voter_secret);
             let choice_idx_u32 = choice_idx as u32;
@@ -299,7 +299,7 @@ async fn main() {
             }
         }
         "simulate" => {
-            run_simulation();
+            run_simulation().await;
         }
         _ => {
             println!("Unknown command: {}", command);
@@ -370,7 +370,7 @@ fn get_merkle_path_for_leaf(election_name: &str, leaf: [u8; 32]) -> (Vec<[u8; 32
     (path, indices)
 }
 
-fn run_simulation() {
+async fn run_simulation() {
     println!("--- Quantum Safe ZK-STARK Voting Protocol (SP1 zkVM) ---");
     println!("--- LWE Homomorphic Tallying for {} Candidates ---", NUM_CANDIDATES);
 
@@ -412,8 +412,8 @@ fn run_simulation() {
     println!("Merkle Root: {}", hex::encode(merkle_root));
 
     let mut submitted_ciphertexts = Vec::new();
-    let client = ProverClient::new();
-    let (pk, _vk) = client.setup(GUEST_ELF);
+    let client = ProverClient::from_env().await;
+    let pk = client.setup(GUEST_ELF).await.unwrap();
 
     for (i, (&voter_secret, &choice_idx)) in voter_secrets.iter().zip(voter_choices.iter()).enumerate() {
         println!("\n--- Processing Voter {} ---", i + 1);
