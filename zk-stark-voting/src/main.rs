@@ -184,7 +184,7 @@ fn main() {
             let campaign_str = match fs::read_to_string(&campaign_path) {
                 Ok(s) => s,
                 Err(_) => {
-                    println!("Error: Could not read campaign parameters at {}", campaign_path);
+                    println!("Error: Could not read campaign parameters at {}. Did you forget to run 'create_election <election_name>'?", campaign_path);
                     return;
                 }
             };
