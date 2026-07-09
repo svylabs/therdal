@@ -33,7 +33,8 @@ fn main() {
                 .expect("Time went backwards");
             let seed = since_the_epoch.as_millis() as u128;
 
-            let secret = BaseElement::new(seed);
+            // Generate a small secret to prevent LWE noise from overwhelming the message during decryption
+            let secret = BaseElement::new((seed % 10000) + 1);
             let a = BaseElement::new(456);
             let e = BaseElement::new(1); // very small error to prevent toy decryption failures
 
@@ -184,7 +185,7 @@ fn main() {
             let campaign_str = match fs::read_to_string(&campaign_path) {
                 Ok(s) => s,
                 Err(_) => {
-                    println!("Error: Could not read campaign parameters at {}", campaign_path);
+                    println!("Error: Could not read campaign parameters at {}. Did you forget to run 'create_election <election_name>'?", campaign_path);
                     return;
                 }
             };
@@ -335,9 +336,7 @@ fn main() {
 
             println!("Campaign Manager decrypted the final tally!");
             for (i, tally) in final_tally.iter().enumerate() {
-                if *tally != BaseElement::ZERO {
-                    println!("Votes for Candidate {}: {}", i, tally);
-                }
+                println!("Votes for Candidate {}: {}", i, tally);
             }
         }
         "simulate" => {
