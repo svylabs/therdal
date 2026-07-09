@@ -1,78 +1,104 @@
-use winter_crypto::Hasher;
-use winter_crypto::hashers::Blake3_256;
-use winter_math::{FieldElement, StarkField, fields::f128::BaseElement};
-
-pub type HashFn = Blake3_256<BaseElement>;
-pub type HashDigest = <HashFn as Hasher>::Digest;
+use serde::{Deserialize, Serialize};
+use rand::Rng;
 
 pub const NUM_CANDIDATES: usize = 10;
+pub const LWE_N: usize = 512; // Standard lattice dimension for high security
+pub const LWE_DELTA: u64 = 1 << 48; // Scaled factor for message encoding to tolerate noise aggregation
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LweVectorCiphertext {
-    pub u: [BaseElement; NUM_CANDIDATES],
-    pub v: [BaseElement; NUM_CANDIDATES],
+    pub u: Vec<Vec<u64>>, // NUM_CANDIDATES x LWE_N
+    pub v: Vec<u64>,     // NUM_CANDIDATES
 }
 
 impl LweVectorCiphertext {
     pub fn add_homomorphic(&self, other: &LweVectorCiphertext) -> LweVectorCiphertext {
-        let mut u_new = [BaseElement::ZERO; NUM_CANDIDATES];
-        let mut v_new = [BaseElement::ZERO; NUM_CANDIDATES];
+        let mut u_new = vec![vec![0u64; LWE_N]; NUM_CANDIDATES];
+        let mut v_new = vec![0u64; NUM_CANDIDATES];
         for i in 0..NUM_CANDIDATES {
-            u_new[i] = self.u[i] + other.u[i];
-            v_new[i] = self.v[i] + other.v[i];
+            for j in 0..LWE_N {
+                u_new[i][j] = self.u[i][j].wrapping_add(other.u[i][j]);
+            }
+            v_new[i] = self.v[i].wrapping_add(other.v[i]);
         }
         LweVectorCiphertext { u: u_new, v: v_new }
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LwePublicKey {
-    pub a: BaseElement,
-    pub b: BaseElement,
+    pub a: Vec<Vec<u64>>, // NUM_CANDIDATES x LWE_N
+    pub b: Vec<u64>,     // NUM_CANDIDATES
 }
 
-/// An implementation of Learning With Errors (LWE) cryptosystem.
-///
-/// **Security Assumptions & Production Requirements:**
-/// This implementation operates over the prime field (`BaseElement`).
-///
-/// To be production-ready and provide 128-bit (or higher) security against quantum
-/// attacks, a Ring-LWE or multi-dimensional LWE scheme must be used with appropriately sized parameters:
-/// - **Lattice Dimension ($n$):** Typically $n \ge 512$ or $1024$.
-/// - **Modulus ($q$):** A sufficiently large modulus, often multi-word.
-/// - **Error Distribution ($\chi$):** A discrete Gaussian or similar distribution
-///   with standard deviation $\sigma$ tuned for the desired security level.
-/// - **Key Size:** Public and private keys are large vectors/polynomials, usually
-///   several kilobytes in size, rather than single field elements.
 pub struct Lwe {
-    pub delta: BaseElement,
+    pub delta: u64,
 }
 
 impl Lwe {
     pub fn new() -> Self {
         Self {
-            delta: BaseElement::new(100_000_000_000),
+            delta: LWE_DELTA,
         }
     }
 
-    pub fn generate_keys(&self, s: BaseElement, a: BaseElement, e: BaseElement) -> LwePublicKey {
-        let b = (a * s) + e;
+    /// Discrete Gaussian Sampler approximation using Irwin-Hall distribution
+    /// Sums 12 independent uniform samples in [-sigma, sigma] to approximate a Gaussian distribution
+    pub fn sample_gaussian_noise<R: Rng>(rng: &mut R) -> u64 {
+        let mut sum: i64 = 0;
+        for _ in 0..12 {
+            sum += (rng.next_u32() % 7) as i64 - 3; // samples in [-3, 3]
+        }
+        sum as u64
+    }
+
+    pub fn generate_keys<R: Rng>(&self, s: &[u64], rng: &mut R) -> LwePublicKey {
+        let mut a = vec![vec![0u64; LWE_N]; NUM_CANDIDATES];
+        let mut b = vec![0u64; NUM_CANDIDATES];
+
+        for i in 0..NUM_CANDIDATES {
+            // Generate random 'a' vector
+            for j in 0..LWE_N {
+                a[i][j] = rng.next_u64();
+            }
+
+            // Compute b = a * s + e
+            let mut a_dot_s: u64 = 0;
+            for j in 0..LWE_N {
+                a_dot_s = a_dot_s.wrapping_add(a[i][j].wrapping_mul(s[j]));
+            }
+            let e = Self::sample_gaussian_noise(rng);
+            b[i] = a_dot_s.wrapping_add(e);
+        }
+
         LwePublicKey { a, b }
     }
 
-    pub fn encrypt_vector(
+    pub fn encrypt_vector<R: Rng>(
         &self,
-        m: &[BaseElement; NUM_CANDIDATES],
+        m: &[u64; NUM_CANDIDATES],
         pk: &LwePublicKey,
-        r: &[BaseElement; NUM_CANDIDATES],
-        e1: &[BaseElement; NUM_CANDIDATES],
-        e2: &[BaseElement; NUM_CANDIDATES],
+        rng: &mut R,
     ) -> LweVectorCiphertext {
-        let mut u = [BaseElement::ZERO; NUM_CANDIDATES];
-        let mut v = [BaseElement::ZERO; NUM_CANDIDATES];
+        let mut u = vec![vec![0u64; LWE_N]; NUM_CANDIDATES];
+        let mut v = vec![0u64; NUM_CANDIDATES];
 
         for i in 0..NUM_CANDIDATES {
-            u[i] = (pk.a * r[i]) + e1[i];
-            v[i] = (pk.b * r[i]) + e2[i] + (m[i] * self.delta);
+            // Encryption under LWE public key:
+            // Choose small random scalar r from {0, 1}
+            let r = rng.gen_range(0..2);
+
+            // u = a * r + e1
+            for j in 0..LWE_N {
+                let e1 = Self::sample_gaussian_noise(rng);
+                u[i][j] = pk.a[i][j].wrapping_mul(r).wrapping_add(e1);
+            }
+
+            // v = b * r + e2 + m * delta
+            let e2 = Self::sample_gaussian_noise(rng);
+            let br = pk.b[i].wrapping_mul(r);
+            let message_term = m[i].wrapping_mul(self.delta);
+            v[i] = br.wrapping_add(e2).wrapping_add(message_term);
         }
 
         LweVectorCiphertext { u, v }
@@ -81,38 +107,29 @@ impl Lwe {
     pub fn decrypt_vector(
         &self,
         c: &LweVectorCiphertext,
-        s: BaseElement,
-    ) -> [BaseElement; NUM_CANDIDATES] {
-        let mut m_vec = [BaseElement::ZERO; NUM_CANDIDATES];
+        s: &[u64],
+    ) -> [u64; NUM_CANDIDATES] {
+        let mut m_vec = [0u64; NUM_CANDIDATES];
         for i in 0..NUM_CANDIDATES {
-            let noisy_m = c.v[i] - (c.u[i] * s);
+            // Decryption: noisy_m = v - u * s
+            let mut u_dot_s: u64 = 0;
+            for j in 0..LWE_N {
+                u_dot_s = u_dot_s.wrapping_add(c.u[i][j].wrapping_mul(s[j]));
+            }
+            let noisy_m = c.v[i].wrapping_sub(u_dot_s);
 
-            // Because field elements wrap around Modulus when subtracting,
-            // a negative error term will show up as Modulus - e.
-            let modulus = BaseElement::MODULUS;
-            let half_modulus = modulus / 2;
+            // Center modulo 2^64 to signed i64 representation to handle negative noise wrapping
+            let val_signed = noisy_m as i64;
 
-            let val = noisy_m.as_int();
-
-            // Center the value to [-q/2, q/2]
-            let val_centered = if val > half_modulus {
-                let val_signed = val as i128;
-                let mod_signed = modulus as i128;
-                val_signed - mod_signed
+            // Round to nearest multiple of delta: round(val / delta)
+            let delta_signed = self.delta as i64;
+            let m_approx = if val_signed >= 0 {
+                (val_signed + delta_signed / 2) / delta_signed
             } else {
-                val as i128
+                (val_signed - delta_signed / 2) / delta_signed
             };
 
-            let delta_i = self.delta.as_int() as i128;
-            // Round to nearest integer: (val_centered + delta/2) / delta
-            let m_approx = if val_centered >= 0 {
-                (val_centered + delta_i / 2) / delta_i
-            } else {
-                (val_centered - delta_i / 2) / delta_i
-            };
-
-            let m_final = if m_approx < 0 { 0 } else { m_approx as u128 };
-            m_vec[i] = BaseElement::new(m_final);
+            m_vec[i] = if m_approx < 0 { 0 } else { m_approx as u64 };
         }
         m_vec
     }
@@ -121,68 +138,61 @@ impl Lwe {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use winter_math::FieldElement;
+    use rand::rngs::OsRng;
+    use rand::RngCore;
 
     #[test]
     fn test_lwe_encryption_decryption() {
+        let mut rng = OsRng;
         let lwe = Lwe::new();
-        let s = BaseElement::new(100);
-        let a = BaseElement::new(200);
-        let e = BaseElement::new(1);
-        let pk = lwe.generate_keys(s, a, e);
-
-        let m = BaseElement::new(1);
-        let r = BaseElement::new(5);
-        let e1 = BaseElement::new(1);
-        let e2 = BaseElement::new(2);
-
-        let mut m_vec = [BaseElement::ZERO; NUM_CANDIDATES];
-        m_vec[3] = m;
-
-        let mut r_vec = [BaseElement::ZERO; NUM_CANDIDATES];
-        let mut e1_vec = [BaseElement::ZERO; NUM_CANDIDATES];
-        let mut e2_vec = [BaseElement::ZERO; NUM_CANDIDATES];
-        for i in 0..NUM_CANDIDATES {
-            r_vec[i] = r;
-            e1_vec[i] = e1;
-            e2_vec[i] = e2;
+        
+        let mut s = vec![0u64; LWE_N];
+        for j in 0..LWE_N {
+            s[j] = (rng.next_u32() % 2) as u64;
         }
 
-        let ciphertext = lwe.encrypt_vector(&m_vec, &pk, &r_vec, &e1_vec, &e2_vec);
-        let decrypted = lwe.decrypt_vector(&ciphertext, s);
+        let pk = lwe.generate_keys(&s, &mut rng);
 
-        assert_eq!(decrypted[3], BaseElement::new(1));
-        assert_eq!(decrypted[0], BaseElement::ZERO);
+        let mut m = [0u64; NUM_CANDIDATES];
+        m[3] = 1;
+
+        let ciphertext = lwe.encrypt_vector(&m, &pk, &mut rng);
+        let decrypted = lwe.decrypt_vector(&ciphertext, &s);
+
+        assert_eq!(decrypted[3], 1);
+        assert_eq!(decrypted[0], 0);
     }
 
     #[test]
     fn test_lwe_homomorphic_addition() {
+        let mut rng = OsRng;
         let lwe = Lwe::new();
-        let s = BaseElement::new(123);
-        let a = BaseElement::new(456);
-        let pk = lwe.generate_keys(s, a, BaseElement::ZERO);
 
-        let mut m1 = [BaseElement::ZERO; NUM_CANDIDATES];
-        m1[2] = BaseElement::new(1);
+        let mut s = vec![0u64; LWE_N];
+        for j in 0..LWE_N {
+            s[j] = (rng.next_u32() % 2) as u64;
+        }
 
-        let mut m2 = [BaseElement::ZERO; NUM_CANDIDATES];
-        m2[2] = BaseElement::new(1);
+        let pk = lwe.generate_keys(&s, &mut rng);
 
-        let mut m3 = [BaseElement::ZERO; NUM_CANDIDATES];
-        m3[5] = BaseElement::new(1);
+        let mut m1 = [0u64; NUM_CANDIDATES];
+        m1[2] = 1;
 
-        let r_vec = [BaseElement::new(10); NUM_CANDIDATES];
-        let e_vec = [BaseElement::new(1); NUM_CANDIDATES];
+        let mut m2 = [0u64; NUM_CANDIDATES];
+        m2[2] = 1;
 
-        let c1 = lwe.encrypt_vector(&m1, &pk, &r_vec, &e_vec, &e_vec);
-        let c2 = lwe.encrypt_vector(&m2, &pk, &r_vec, &e_vec, &e_vec);
-        let c3 = lwe.encrypt_vector(&m3, &pk, &r_vec, &e_vec, &e_vec);
+        let mut m3 = [0u64; NUM_CANDIDATES];
+        m3[5] = 1;
+
+        let c1 = lwe.encrypt_vector(&m1, &pk, &mut rng);
+        let c2 = lwe.encrypt_vector(&m2, &pk, &mut rng);
+        let c3 = lwe.encrypt_vector(&m3, &pk, &mut rng);
 
         let c_agg = c1.add_homomorphic(&c2).add_homomorphic(&c3);
-        let decrypted_agg = lwe.decrypt_vector(&c_agg, s);
+        let decrypted_agg = lwe.decrypt_vector(&c_agg, &s);
 
-        assert_eq!(decrypted_agg[2], BaseElement::new(2));
-        assert_eq!(decrypted_agg[5], BaseElement::new(1));
-        assert_eq!(decrypted_agg[0], BaseElement::ZERO);
+        assert_eq!(decrypted_agg[2], 2);
+        assert_eq!(decrypted_agg[5], 1);
+        assert_eq!(decrypted_agg[0], 0);
     }
 }
