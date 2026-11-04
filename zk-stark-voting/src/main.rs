@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::env;
 use std::fs;
 use rand::rngs::OsRng;
@@ -7,9 +8,20 @@ use serde_json;
 
 use zk_stark_voting::voting::crypto::{Lwe, LwePublicKey, LweVectorCiphertext, NUM_CANDIDATES, LWE_N};
 use zk_stark_voting::voting::types::Vote;
-use sp1_sdk::{Prover, ProverClient, prelude::SP1Stdin, include_elf, Elf};
+use sp1_sdk::{Prover, ProverClient, ProvingKey, prelude::SP1Stdin, include_elf, Elf};
 
 const GUEST_ELF: Elf = include_elf!("zk-stark-voting-program");
+
+fn ensure_default_prover_env() {
+    if env::var("SP1_PROVER").is_err() {
+        // Default to SP1's in-memory mock prover for fast simulation & local CLI runs
+        // as documented in PROTOCOL.md and docs/sp1_toolchain_setup.md.
+        // Users can override with `SP1_PROVER=cpu` or `SP1_PROVER=network`.
+        unsafe {
+            env::set_var("SP1_PROVER", "mock");
+        }
+    }
+}
 
 
 #[tokio::main]
@@ -211,6 +223,7 @@ async fn main() {
             rng.fill_bytes(&mut seed);
 
             // SP1 Prover setup
+            ensure_default_prover_env();
             let client = ProverClient::from_env().await;
             let pk = client.setup(GUEST_ELF).await.unwrap();
             let mut stdin = SP1Stdin::new();
@@ -228,13 +241,36 @@ async fn main() {
                 .await
                 .expect("Guest program execution or proving failed!");
 
-            // Extract public outputs from the proof
+            // Verify cryptographic STARK proof
+            client.verify(&proof, pk.verifying_key(), None)
+                .expect("STARK proof verification failed!");
+
+            // Extract and validate public outputs from the proof
             let mut public_values = proof.public_values;
             let ciphertext: LweVectorCiphertext = public_values.read();
             let nullifier: [u8; 32] = public_values.read();
+            let committed_root: [u8; 32] = public_values.read();
+            let committed_pk_hash: [u8; 32] = public_values.read();
+
+            assert_eq!(committed_root, merkle_root, "Proof Merkle root mismatch!");
+            assert_eq!(committed_pk_hash, cm_pub_key.commitment(), "Proof LWE public key commitment mismatch!");
+
+            // Prevent double voting by checking nullifier registry
+            let nullifiers_path = format!("{}/nullifiers.json", election_name);
+            let mut used_nullifiers: Vec<String> = fs::read_to_string(&nullifiers_path)
+                .ok()
+                .and_then(|s| serde_json::from_str(&s).ok())
+                .unwrap_or_default();
+            let nullifier_hex = hex::encode(nullifier);
+            if used_nullifiers.contains(&nullifier_hex) {
+                println!("Error: Double voting detected! Nullifier {} has already been used.", nullifier_hex);
+                return;
+            }
+            used_nullifiers.push(nullifier_hex.clone());
+            fs::write(&nullifiers_path, serde_json::to_string(&used_nullifiers).unwrap()).unwrap();
 
             println!("Generated SP1 zkVM STARK Proof for Voter '{}'!", voter_name);
-            println!("  Nullifier: {}", hex::encode(nullifier));
+            println!("  Nullifier: {}", nullifier_hex);
 
             let vote_json = serde_json::to_string(&ciphertext).unwrap();
             let vote_path = format!("{}/votes/{}.json", election_name, voter_name);
@@ -386,7 +422,8 @@ async fn run_simulation() {
     // Register voters and build Merkle tree
     let voter_secrets = vec![12345u64, 54321u64, 99999u64];
     let voter_choices = vec![0, 5, 0];
-    let leaves: Vec<[u8; 32]> = voter_secrets.iter().map(|&sec| Vote::derive_public_key(sec)).collect();
+    let mut leaves: Vec<[u8; 32]> = voter_secrets.iter().map(|&sec| Vote::derive_public_key(sec)).collect();
+    leaves.sort();
     
     // Build tree
     let mut tree_level = leaves.clone();
@@ -407,11 +444,14 @@ async fn run_simulation() {
         tree_nodes.push(tree_level.clone());
     }
     let merkle_root = tree_nodes[tree_nodes.len() - 1][0];
+    let expected_pk_commitment = cm_pub_key.commitment();
 
     println!("Election Setup Complete.");
     println!("Merkle Root: {}", hex::encode(merkle_root));
 
     let mut submitted_ciphertexts = Vec::new();
+    let mut seen_nullifiers: HashSet<[u8; 32]> = HashSet::new();
+    ensure_default_prover_env();
     let client = ProverClient::from_env().await;
     let pk = client.setup(GUEST_ELF).await.unwrap();
 
@@ -449,9 +489,18 @@ async fn run_simulation() {
             .await
             .expect("Guest program execution failed");
 
+        client.verify(&proof, pk.verifying_key(), None)
+            .expect("STARK proof verification failed");
+
         let mut public_values = proof.public_values;
         let ciphertext: LweVectorCiphertext = public_values.read();
         let nullifier: [u8; 32] = public_values.read();
+        let committed_root: [u8; 32] = public_values.read();
+        let committed_pk_hash: [u8; 32] = public_values.read();
+
+        assert_eq!(committed_root, merkle_root, "Proof Merkle root mismatch!");
+        assert_eq!(committed_pk_hash, expected_pk_commitment, "Proof LWE public key commitment mismatch!");
+        assert!(seen_nullifiers.insert(nullifier), "Double voting detected: duplicate nullifier!");
 
         println!("Generated SP1 zkVM STARK Proof for Voter {}!", i + 1);
         println!("  Nullifier: {}", hex::encode(nullifier));

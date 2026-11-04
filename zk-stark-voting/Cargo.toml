@@ -26,3 +26,6 @@ prover = ["dep:sp1-sdk", "dep:tokio"]
 
 [build-dependencies]
 sp1-helper = "6.3.1"
+
+[profile.dev.package."*"]
+opt-level = 3

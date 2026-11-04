@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use rand::Rng;
+use sha3::{Digest, Keccak256};
 
 pub const NUM_CANDIDATES: usize = 10;
 pub const LWE_N: usize = 512; // Standard lattice dimension for high security
@@ -31,6 +32,22 @@ pub struct LwePublicKey {
     pub b: Vec<u64>,     // NUM_CANDIDATES
 }
 
+impl LwePublicKey {
+    /// Computes a deterministic Keccak256 commitment over the LWE public key parameters.
+    pub fn commitment(&self) -> [u8; 32] {
+        let mut hasher = Keccak256::new();
+        for row in &self.a {
+            for &val in row {
+                hasher.update(&val.to_le_bytes());
+            }
+        }
+        for &val in &self.b {
+            hasher.update(&val.to_le_bytes());
+        }
+        hasher.finalize().into()
+    }
+}
+
 pub struct Lwe {
     pub delta: u64,
 }
@@ -42,14 +59,14 @@ impl Lwe {
         }
     }
 
-    /// Discrete Gaussian Sampler approximation using Irwin-Hall distribution
-    /// Sums 12 independent uniform samples in [-sigma, sigma] to approximate a Gaussian distribution
+    /// Centered Binomial Distribution (CBD) noise sampler (eta = 32).
+    /// Replaces costly modulo divisions in 32-bit RISC-V zkVM with fast bitwise popcount operations.
+    #[inline]
     pub fn sample_gaussian_noise<R: Rng>(rng: &mut R) -> u64 {
-        let mut sum: i64 = 0;
-        for _ in 0..12 {
-            sum += (rng.next_u32() % 7) as i64 - 3; // samples in [-3, 3]
-        }
-        sum as u64
+        let x = rng.next_u64();
+        let a = (x as u32).count_ones() as i64;
+        let b = ((x >> 32) as u32).count_ones() as i64;
+        (a - b) as u64
     }
 
     pub fn generate_keys<R: Rng>(&self, s: &[u64], rng: &mut R) -> LwePublicKey {
@@ -82,21 +99,35 @@ impl Lwe {
     ) -> LweVectorCiphertext {
         let mut u = vec![vec![0u64; LWE_N]; NUM_CANDIDATES];
         let mut v = vec![0u64; NUM_CANDIDATES];
+        let num_samples = pk.b.len();
+        let mask_limit = (1u32 << num_samples) - 1;
 
         for i in 0..NUM_CANDIDATES {
-            // Encryption under LWE public key:
-            // Choose small random scalar r from {0, 1}
-            let r = rng.gen_range(0..2);
+            // Regev LWE subset-sum encryption:
+            // Choose non-zero random binary subset vector r in {0, 1}^m
+            let r_mask = (rng.next_u32() % mask_limit) + 1;
+            let mut br: u64 = 0;
 
-            // u = a * r + e1
-            for j in 0..LWE_N {
-                let e1 = Self::sample_gaussian_noise(rng);
-                u[i][j] = pk.a[i][j].wrapping_mul(r).wrapping_add(e1);
+            for k in 0..num_samples {
+                if ((r_mask >> k) & 1) == 1 {
+                    let pk_a_k = &pk.a[k];
+                    let u_i = &mut u[i];
+                    for j in 0..LWE_N {
+                        u_i[j] = u_i[j].wrapping_add(pk_a_k[j]);
+                    }
+                    br = br.wrapping_add(pk.b[k]);
+                }
             }
 
-            // v = b * r + e2 + m * delta
+            // u_i = A^T * r + e1
+            let u_i = &mut u[i];
+            for j in 0..LWE_N {
+                let e1 = Self::sample_gaussian_noise(rng);
+                u_i[j] = u_i[j].wrapping_add(e1);
+            }
+
+            // v_i = b^T * r + e2 + m_i * delta
             let e2 = Self::sample_gaussian_noise(rng);
-            let br = pk.b[i].wrapping_mul(r);
             let message_term = m[i].wrapping_mul(self.delta);
             v[i] = br.wrapping_add(e2).wrapping_add(message_term);
         }
