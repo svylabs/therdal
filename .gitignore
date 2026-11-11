@@ -4,5 +4,7 @@
 /node_modules
 /frontend/dist
 /frontend/node_modules
+/website/dist
+/website/node_modules
 .DS_Store
 *.sqlite

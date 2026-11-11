@@ -1,9 +1,15 @@
 {
   "name": "@therdal/website",
   "version": "0.2.0",
+  "type": "module",
   "description": "Therdal — A Permissionless and Verifiable Stakeholder Signaling Protocol for Ethereum",
   "scripts": {
-    "start": "python3 -m http.server 4173 --directory .."
+    "start": "python3 -m http.server 4173 --directory ..",
+    "build": "node ./scripts/build-pages.mjs",
+    "preview": "node ./scripts/build-pages.mjs && python3 -m http.server 4173 --directory ./dist",
+    "deploy": "node ./scripts/deploy-pages.mjs",
+    "deploy:dry-run": "node ./scripts/deploy-pages.mjs --dry-run",
+    "test": "node --test ./test/pages.test.mjs"
   },
   "license": "MIT"
 }

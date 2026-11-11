@@ -6,6 +6,16 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta name="description" content="Therdal Protocol Documentation — Concepts, Operator Guides for Vote Aggregators and Batch Provers, and Technical Specifications." />
   <title>Therdal Docs — Protocol &amp; Operator Documentation</title>
+  <link rel="canonical" href="https://therdal.org/docs.html" />
+  <meta property="og:site_name" content="Therdal" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://therdal.org/docs.html" />
+  <meta property="og:title" content="Therdal Docs — Protocol &amp; Operator Documentation" />
+  <meta property="og:description" content="Concepts, Operator Guides for Vote Aggregators and Batch Provers, and Technical Specifications." />
+  <meta property="og:image" content="https://therdal.org/assets/apple-touch-icon.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Therdal Docs — Protocol &amp; Operator Documentation" />
+  <meta name="twitter:description" content="Concepts, Operator Guides for Vote Aggregators and Batch Provers, and Technical Specifications." />
   <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=2" />
   <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png?v=2" />
   <link rel="shortcut icon" href="./assets/favicon.ico?v=2" />
@@ -441,11 +451,21 @@ cargo run --offline --bin therdal-cli -- vote-direct \
 
 cargo run --offline --bin therdal-cli -- tallies --topic-id 1</code></pre>
 
-          <h2>4. Launch the Website &amp; Interactive App</h2>
-          <pre class="md-code"><code>python3 -m http.server 4173
+          <h2>4. Launch &amp; Deploy the Website (GitHub Pages · <code>therdal.org</code>)</h2>
+          <pre class="md-code"><code># Local workspace dev server
+python3 -m http.server 4173
 # Website:          http://localhost:4173/website/
 # Documentation:    http://localhost:4173/website/docs.html
-# Interactive App:  http://localhost:4173/frontend/</code></pre>
+# Interactive App:  http://localhost:4173/frontend/
+
+# Build, verify &amp; preview static GitHub Pages bundle (website/dist/ with CNAME = therdal.org)
+npm run website:build
+npm run website:test
+npm run website:preview
+
+# Deploy static bundle to `origin/gh-pages` (or push to `main` for automatic GitHub Actions deploy)
+npm run website:deploy:dry-run
+npm run website:deploy</code></pre>
         </article>
 
         <!-- 3. TOPICS & CUSTOM OPTIONS -->

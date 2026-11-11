@@ -82,10 +82,22 @@ cargo run --offline --bin therdal-cli -- vote-direct \
 cargo run --offline --bin therdal-cli -- tallies --topic-id 1
 ```
 
-### 5. Launch the Website & Interactive Stage 2 App
+### 5. Launch & Deploy the Website (`therdal.org` · GitHub Pages)
 ```bash
+# Local development server
 python3 -m http.server 4173
 # Public Protocol Website: http://localhost:4173/website/  (or http://localhost:4173/)
 # Documentation Portal:    http://localhost:4173/website/docs.html
 # Interactive Stage 2 App: http://localhost:4173/frontend/
+
+# Build, test & preview the production GitHub Pages bundle (website/dist/)
+npm run website:build
+npm run website:test
+npm run website:preview
+
+# Deploy to GitHub Pages (`origin/gh-pages`, custom domain: therdal.org)
+npm run website:deploy:dry-run
+npm run website:deploy
 ```
+
+Automatic CI/CD deployment is also configured in `.github/workflows/deploy-pages.yml` (set **Settings → Pages → Source: GitHub Actions** on GitHub). See [`docs/deployment.md`](docs/deployment.md) for `therdal.org` DNS records and full hosting details.
