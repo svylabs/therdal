@@ -1,11 +1,11 @@
 {
   "name": "@therdal/sdk",
-  "version": "0.1.0",
-  "description": "TypeScript SDK for Therdal Protocol (Stage 1: Topic Creation) — Validation, Content Hashing & Contract ABIs",
+  "version": "0.2.0",
+  "description": "TypeScript SDK for Therdal Protocol — Stage 1 Topic Creation & Stage 2 Direct Snapshot Voting (MPT & SSZ Proofs)",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "test": "node --test test/topic.test.ts"
+    "test": "node --test test/topic.test.ts test/voting.test.ts"
   },
   "license": "MIT"
 }

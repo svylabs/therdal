@@ -27,8 +27,20 @@ Creating a topic registers on Ethereum (`contracts/Therdal.sol` + `contracts/lib
    - Creating a topic requires **`$0` protocol fee** and **`$0` mandatory deposit** (`initialSponsorship = 0`).
    - Creators or community sponsors can optionally fund a topic's `SponsorEscrow` pool (`initialSponsorship > 0` or `sponsorTopic(topicId, amount)`), with **100%** entering escrow and `TherdalController.sol` freezing `paymentToken` and `pricePerVote` (`~$0.01 / vote` default estimate) per topic.
 5. **Automatic Parent Block Snapshot & Cross-Layer Commitment**:
-   - Pins `snapshotBlock = block.number - 1` and `snapshotBlockHash = blockhash(block.number - 1)` automatically at creation.
+   - Pins `snapshotBlock = block.number - 1`, `snapshotBlockHash = blockhash(block.number - 1)`, and EIP-4788 `snapshotBeaconBlockRoot` automatically at creation.
    - Computes deterministic 32-byte `contentHash` (`THERDAL_TOPIC_V1`) verified identically across Solidity, Rust (`therdal-topics`), TypeScript (`@therdal/sdk`), and the browser frontend (`frontend/`).
+
+### Stage 2: Direct Snapshot Voting (`Complete`)
+
+ETH holders can vote directly on-chain on any `Open` topic (`contracts/Therdal.sol` + `contracts/interfaces/IDirectVoting.sol`, **`$0` protocol fee**, zero `SponsorEscrow` used):
+1. **Execution Layer ETH Proofs (`voteWithExecutionBalance`)**:
+   - Authenticates `snapshotExecutionRoot` from the canonical RLP execution block header matching `snapshotBlockHash` (`SnapshotAuthenticator.sol`, `RLPReader.sol`).
+   - Verifies EIP-1186 Merkle Patricia Trie account proofs (`MerklePatriciaProofVerifier.sol`) for `keccak256(msg.sender)` and locks `THERDAL_WALLET` position key against double-voting.
+2. **Beacon Chain Staked ETH Proofs (`voteWithBeaconStake`)**:
+   - Authenticates `snapshotBeaconRoot` and `snapshotEpoch = beaconSlot / 32` from EIP-4788 `snapshotBeaconBlockRoot`, verifying SSZ execution-consensus block hash alignment at leaf index `780`.
+   - Verifies depth-40 SHA-256 SSZ `Validator` inclusion proofs (`SSZVerifier.sol`), enforcing `!slashed`, `activationEpoch <= snapshotEpoch < exitEpoch`, and `0x01` or `0x02` withdrawal credentials pointing to `msg.sender`, locking each `THERDAL_VALIDATOR` key.
+3. **Combined Atomic Direct Voting (`voteDirect`)**:
+   - Proves both an execution wallet balance and multiple staked validators in a single transaction, verified identically across Solidity, Rust (`therdal-voting`), TypeScript (`@therdal/sdk`), and the interactive web app (`frontend/`).
 
 ---
 
@@ -49,22 +61,31 @@ cargo test --offline
 cd sdk && npm test
 ```
 
-### 4. Register & Inspect a Topic via CLI
+### 4. Register a Topic & Cast Direct Snapshot Votes via CLI
 ```bash
-cargo run --offline --bin therdal-cli -- create-topic \
-  --subject "Should Ethereum increase the blob target from 6 to 12?" \
-  --option "12 Blobs" \
-  --option "9 Blobs" \
-  --option "Keep at 6 Blobs" \
-  --voting-ends-at 1900000000
+# Generate deterministic RLP/MPT + Beacon SSZ snapshot fixture for voter + validator #42
+cargo run --offline --bin therdal-cli -- generate-proof-fixture \
+  --voter 0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A \
+  --balance-wei 25000000000000000000 \
+  --validator-index 42 \
+  --effective-balance-gwei 32000000000 \
+  --snapshot-block 21499999 \
+  --out ./fixture.json
 
-cargo run --offline --bin therdal-cli -- list-topics
+# Create a topic pinned to the fixture's snapshotBlockHash, cast combined direct vote, and inspect tallies
+cargo run --offline --bin therdal-cli -- vote-direct \
+  --topic-id 1 \
+  --option-index 0 \
+  --voter 0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A \
+  --bundle-file ./fixture.json
+
+cargo run --offline --bin therdal-cli -- tallies --topic-id 1
 ```
 
-### 5. Launch the Website & Interactive Stage 1 App
+### 5. Launch the Website & Interactive Stage 2 App
 ```bash
 python3 -m http.server 4173
 # Public Protocol Website: http://localhost:4173/website/  (or http://localhost:4173/)
 # Documentation Portal:    http://localhost:4173/website/docs.html
-# Interactive Stage 1 App: http://localhost:4173/frontend/
+# Interactive Stage 2 App: http://localhost:4173/frontend/
 ```

@@ -11,6 +11,9 @@ interface Vm {
     function warp(uint256 newTimestamp) external;
     function roll(uint256 newBlockNumber) external;
     function prank(address msgSender) external;
+    function setBlockhash(uint256 blockNumber, bytes32 blockHash) external;
+    function etch(address target, bytes calldata newRuntimeBytecode) external;
+    function chainId(uint256 newChainId) external;
     function expectRevert(bytes calldata revertData) external;
     function expectRevert(bytes4 revertSelector) external;
 }

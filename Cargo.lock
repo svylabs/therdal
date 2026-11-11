@@ -310,6 +310,7 @@ dependencies = [
  "serde",
  "serde_json",
  "therdal-topics",
+ "therdal-voting",
 ]
 
 [[package]]
@@ -320,6 +321,18 @@ dependencies = [
  "serde",
  "serde_json",
  "sha3",
+ "thiserror",
+]
+
+[[package]]
+name = "therdal-voting"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "serde",
+ "serde_json",
+ "sha3",
+ "therdal-topics",
  "thiserror",
 ]
 

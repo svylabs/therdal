@@ -22,9 +22,9 @@ This document records the concrete protocol choices resolving the 10 open questi
 ## 3. On-Chain Topic Registration & Snapshot Pinning
 - **On-Chain Subject, Custom Options & Deadline (Stage 1)**:
   - `createTopic(subject, options, votingEndsAt, initialSponsorship)` (and `createTopicWithConfig(CreateTopicParams)`) registers `subject` (`<= 512` UTF-8 bytes), `2..=16` unique non-empty free-text `options` (`<= 256` UTF-8 bytes each), and `votingEndsAt > block.timestamp`, computing deterministic `contentHash` (`THERDAL_TOPIC_V1`).
-- **Pin at Creation, Authenticate Before Settlement**:
-  - `createTopic` automatically pins `snapshotBlock = uint64(block.number - 1)` and `snapshotBlockHash = blockhash(block.number - 1)` directly on-chain at creation.
-  - Prior to settling batches in later protocol stages, execution and beacon state roots are authenticated against the pinned snapshot block via `BLOCKHASH`/EIP-2935 (`0x0000F90827F1C53a10cb7A02335B175320002935`) and EIP-4788 (`0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02`).
+- **Pin at Creation, Authenticate Before Voting / Settlement**:
+  - `createTopic` automatically pins `snapshotBlock = uint64(block.number - 1)`, `snapshotBlockHash = blockhash(block.number - 1)`, and `snapshotBeaconBlockRoot` (read from EIP-4788 `0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02` at `block.timestamp`) directly on-chain at creation.
+  - Execution and beacon state roots (`snapshotExecutionRoot`, `snapshotBeaconRoot`, `snapshotEpoch`) are authenticated once per topic against the pinned snapshot roots via `SnapshotAuthenticator.sol` (`authenticateExecutionSnapshot`, `authenticateBeaconSnapshot`, or inline on the first direct vote).
 
 ## 4. Eligible ETH Balances & Validator Control Rules
 - **Execution Balances (`THERDAL_WALLET`)**: Proven against `snapshotExecutionRoot`; weight equals RLP-decoded `balance` in wei.
@@ -37,8 +37,9 @@ This document records the concrete protocol choices resolving the 10 open questi
   - Across batches, settlement is **non-sequential**: any registered, unsettled `batchId` can be proven against the current on-chain `positionRoot` SMT.
   - Once a position key is inserted into `positionRoot` by a settled batch, any later settled batch containing a claim for that same position sees it in the SMT and skips that position (`weight = 0` added). If a vote contributes zero newly counted positions, it does **not** increment `newlyAcceptedVoteCount`.
 
-## 6. Direct On-Chain Voting in v1
-- **Disabled in v1**: Direct on-chain voting is disabled in v1 (`Section 8`) to preserve unified SMT position uniqueness.
+## 6. Direct On-Chain Voting (Stage 2)
+- **Enabled via Canonical Position Keys (`IDirectVoting.sol`)**: ETH holders can vote directly on-chain during `Open` (`block.timestamp <= votingEndsAt`) by calling `voteWithExecutionBalance` (RLP header + EIP-1186 MPT account proof), `voteWithBeaconStake` (EIP-4788 + depth-40 SHA-256 SSZ `0x01`/`0x02` validator proofs), or `voteDirect` (both atomically).
+- **Zero Fee & Unified Nullifiers**: Direct voting charges `$0` protocol fee, consumes `0` from `SponsorEscrow`, and enforces uniqueness using the identical `THERDAL_WALLET` and `THERDAL_VALIDATOR` position keys.
 
 ## 7. Permissionless Submitters, Missing Archives & Stalled Settlement Recovery
 - **Permissionless Publication**: Any submitter/frontend operator can call `publishBatch(resolutionId, blobCount)` during `Open`. Voters censored by one submitter can route their signed vote to any alternative submitter or self-publish.
@@ -50,7 +51,7 @@ This document records the concrete protocol choices resolving the 10 open questi
 
 ## 9. Payment Asset, Smart-Account Controller, Price Freeze & Insufficient-Escrow Policy
 - **Payment Asset**: **USDC (6 decimals)** initially, with multi-stablecoin allowlist support (`acceptedTokens[token]`) managed by `TherdalController.sol`. Prices are configured in 6-decimal USD micro-units (`$1.00 = 1_000_000`) and scaled automatically to the chosen stablecoin's decimals (`10 ** decimals / 10 ** 6`).
-- **Controller & Developer Smart Account (`TherdalController.sol`)**: Operated initially by 1 signer and replaceable by a DAO / Timelock (`transferOperator`). Acts as pricing authority (constantly updating fee parameters—such as the estimated `~$0.01 / vote` rate—to reflect market realities) and initial `developerRecipient` (receiving `25%` of settled vote fees; topic creation charges `$0` fee).
+- **Pricing Controller (`TherdalController.sol`)**: Operated initially by 1 signer and replaceable by a DAO / Timelock (`transferOperator`). Acts as pricing authority (constantly updating fee parameters—such as the estimated `~$0.01 / vote` rate—to reflect market realities). Settled vote fees go to Vote Aggregators (`35%`) and Batch Provers (`65%`).
 - **Frozen Resolution Pricing**: Each resolution freezes its `paymentToken` and `pricePerVote` at creation so future controller price updates never retroactively reprice prepaid sponsorship escrow.
 - **Insufficient Escrow Policy**: `settleBatch` reverts (`InsufficientEscrowBalance`) if `newlyAcceptedVoteCount * pricePerVote > remainingEscrow`; partial settlement of underfunded batches is disallowed.
 

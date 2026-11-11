@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./src/material-v11.css?v=14" />
+  <link rel="stylesheet" href="./src/material-v11.css?v=18" />
 </head>
 <body>
   <!-- Material Design 3 Top App Bar -->
@@ -34,6 +34,18 @@
       </nav>
 
       <div class="top-bar-actions">
+        <a
+          href="https://github.com/svylabs/therdal"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="md-github-btn md-ripple"
+          aria-label="Therdal GitHub Repository"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
+          </svg>
+          <span>GitHub</span>
+        </a>
         <a href="../frontend/index.html" class="md-btn md-btn-filled md-ripple">
           <span>Launch App</span>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -472,7 +484,7 @@
         <div class="section-head">
           <span class="section-label">Earn</span>
           <h2 class="md-headline">Earn revenue on every valid vote</h2>
-          <p class="section-sub">Earn USDC automatically from sponsored funds for every valid vote.</p>
+          <p class="section-sub">All sponsored vote fees go directly to Aggregators (35%) and Provers (65%).</p>
         </div>
 
         <!-- 2 Operator Cards: Aggregators & Provers -->
@@ -486,7 +498,7 @@
                   <path d="M7 20h10M12 16v4" />
                 </svg>
               </span>
-              <span class="md-tonal-badge badge-primary">25% per Valid Vote</span>
+              <span class="md-tonal-badge badge-primary">35% per Valid Vote</span>
             </div>
             <h3>Aggregators</h3>
             <p class="actor-role-line">Host voting frontends &amp; post batches</p>
@@ -498,7 +510,7 @@
               <span class="step-arrow">→</span>
               <span class="step-chip">Post Batch</span>
               <span class="step-arrow">→</span>
-              <span class="step-chip step-chip-accent">Earn 25%</span>
+              <span class="step-chip step-chip-accent">Earn 35%</span>
             </div>
           </article>
 
@@ -511,7 +523,7 @@
                   <path d="M9.5 12l1.8 1.8 3.5-3.6" />
                 </svg>
               </span>
-              <span class="md-tonal-badge badge-tertiary">50% per Valid Vote</span>
+              <span class="md-tonal-badge badge-tertiary">65% per Valid Vote</span>
             </div>
             <h3>Provers</h3>
             <p class="actor-role-line">Prove batch validity &amp; finalize tallies</p>
@@ -523,7 +535,7 @@
               <span class="step-arrow">→</span>
               <span class="step-chip">Prove Validity</span>
               <span class="step-arrow">→</span>
-              <span class="step-chip step-chip-tertiary">Earn 50%</span>
+              <span class="step-chip step-chip-tertiary">Earn 65%</span>
             </div>
           </article>
         </div>
@@ -536,7 +548,7 @@
         <div class="section-head">
           <span class="section-label">Fees</span>
           <h2 class="md-headline">Transparent fees at every step</h2>
-          <p class="section-sub">Creating a topic and voting are always free—operators earn only from optional sponsored funds.</p>
+          <p class="section-sub">Creating a topic and voting are always free—all sponsored vote fees go to Aggregators (35%) and Provers (65%).</p>
         </div>
 
         <!-- Step-by-Step Fee Cards -->
@@ -600,11 +612,11 @@
                 <span class="fee-step-kicker">Vote Aggregator</span>
                 <h3>Submitting a Vote Batch</h3>
               </div>
-              <span class="fee-price-pill pill-primary">25% Share</span>
+              <span class="fee-price-pill pill-primary">35% Share</span>
             </div>
 
             <p class="fee-card-desc">
-              Free to submit; earns from the sponsored pool once the batch is proven.
+              Free to submit; earns 35% of the vote fee from the sponsored pool once the batch is proven.
             </p>
 
             <div class="fee-mode-rows">
@@ -614,7 +626,7 @@
               </div>
               <div class="fee-mode-row">
                 <span><strong>When Proven</strong></span>
-                <strong class="mode-primary">25% (~$0.0025 / vote est.)</strong>
+                <strong class="mode-primary">35% (~$0.0035 / vote est.)</strong>
               </div>
             </div>
           </article>
@@ -626,17 +638,17 @@
                 <span class="fee-step-kicker">Batch Prover</span>
                 <h3>Proving a Vote Batch</h3>
               </div>
-              <span class="fee-price-pill pill-tertiary">50% Share</span>
+              <span class="fee-price-pill pill-tertiary">65% Share</span>
             </div>
 
             <p class="fee-card-desc">
-              Proving releases an estimated <strong>~$0.01 per valid vote</strong>—split 50% Prover, 25% Aggregator, and 25% Protocol.
+              Proving releases an estimated <strong>~$0.01 per valid vote</strong>—split <strong>65% Prover</strong> and <strong>35% Aggregator</strong>.
             </p>
 
             <div class="fee-mode-rows">
               <div class="fee-mode-row">
                 <span><strong>Prover Share</strong></span>
-                <strong class="mode-free">50% (~$0.005 / vote est.)</strong>
+                <strong class="mode-free">65% (~$0.0065 / vote est.)</strong>
               </div>
               <div class="fee-mode-row">
                 <span><strong>Invalid / Duplicate Votes</strong></span>
@@ -651,14 +663,12 @@
           <!-- Left: Visual Ring Chart of Fee Split During Submitting & Proving -->
           <div class="split-visual-col">
             <div class="donut-wrap">
-              <svg viewBox="0 0 160 160" class="donut-svg" aria-label="Fee split during batch submission and proving: 50% Prover, 25% Batch Submitter, 25% Protocol">
+              <svg viewBox="0 0 160 160" class="donut-svg" aria-label="Fee split during batch submission and proving: 65% Prover, 35% Aggregator">
                 <circle cx="80" cy="80" r="56" fill="none" stroke="#282a2f" stroke-width="20" />
-                <!-- 50% Prover -->
-                <circle cx="80" cy="80" r="56" fill="none" stroke="#7dd8b6" stroke-width="20" stroke-dasharray="170 352" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 80 80)" />
-                <!-- 25% Batch Submitter / Aggregator -->
-                <circle cx="80" cy="80" r="56" fill="none" stroke="#aac7ff" stroke-width="20" stroke-dasharray="82 352" stroke-dashoffset="-176" stroke-linecap="round" transform="rotate(-90 80 80)" />
-                <!-- 25% Protocol -->
-                <circle cx="80" cy="80" r="56" fill="none" stroke="#d9b9ff" stroke-width="20" stroke-dasharray="82 352" stroke-dashoffset="-264" stroke-linecap="round" transform="rotate(-90 80 80)" />
+                <!-- 65% Prover -->
+                <circle cx="80" cy="80" r="56" fill="none" stroke="#7dd8b6" stroke-width="20" stroke-dasharray="205 352" stroke-dashoffset="-12" stroke-linecap="round" transform="rotate(-90 80 80)" />
+                <!-- 35% Batch Submitter / Aggregator -->
+                <circle cx="80" cy="80" r="56" fill="none" stroke="#aac7ff" stroke-width="20" stroke-dasharray="99 352" stroke-dashoffset="-241" stroke-linecap="round" transform="rotate(-90 80 80)" />
                 <text x="80" y="77" text-anchor="middle" class="donut-big">~$0.01</text>
                 <text x="80" y="94" text-anchor="middle" class="donut-small">est. / vote</text>
               </svg>
@@ -670,17 +680,12 @@
               <div class="legend-item">
                 <span class="dot dot-tertiary"></span>
                 <span>Prover <small>(proves batch)</small></span>
-                <strong>50%</strong>
+                <strong>65%</strong>
               </div>
               <div class="legend-item">
                 <span class="dot dot-primary"></span>
                 <span>Aggregator <small>(submits batch)</small></span>
-                <strong>25%</strong>
-              </div>
-              <div class="legend-item">
-                <span class="dot dot-purple"></span>
-                <span>Protocol</span>
-                <strong>25%</strong>
+                <strong>35%</strong>
               </div>
             </div>
           </div>
@@ -709,26 +714,18 @@
             <div class="payout-bars">
               <div class="payout-item">
                 <div class="payout-meta">
-                  <span><span class="dot dot-tertiary"></span>Prover <small>(50%)</small></span>
-                  <strong id="simProverAmt">$25.00</strong>
+                  <span><span class="dot dot-tertiary"></span>Prover <small>(65%)</small></span>
+                  <strong id="simProverAmt">$32.50</strong>
                 </div>
-                <div class="md-progress"><div class="md-progress-fill fill-tertiary" id="simProverBar" style="width: 25%"></div></div>
+                <div class="md-progress"><div class="md-progress-fill fill-tertiary" id="simProverBar" style="width: 32.5%"></div></div>
               </div>
 
               <div class="payout-item">
                 <div class="payout-meta">
-                  <span><span class="dot dot-primary"></span>Aggregator <small>(25%)</small></span>
-                  <strong id="simAggAmt">$12.50</strong>
+                  <span><span class="dot dot-primary"></span>Aggregator <small>(35%)</small></span>
+                  <strong id="simAggAmt">$17.50</strong>
                 </div>
-                <div class="md-progress"><div class="md-progress-fill fill-primary" id="simAggBar" style="width: 12.5%"></div></div>
-              </div>
-
-              <div class="payout-item">
-                <div class="payout-meta">
-                  <span><span class="dot dot-purple"></span>Protocol <small>(25%)</small></span>
-                  <strong id="simProtoAmt">$12.50</strong>
-                </div>
-                <div class="md-progress"><div class="md-progress-fill fill-purple" id="simProtoBar" style="width: 12.5%"></div></div>
+                <div class="md-progress"><div class="md-progress-fill fill-primary" id="simAggBar" style="width: 17.5%"></div></div>
               </div>
 
               <div class="payout-item">
@@ -876,24 +873,119 @@
   </main>
 
   <footer class="md-footer">
-    <div class="md-container footer-inner">
-      <div class="footer-brand">
-        <img src="./assets/logo-mark.svg?v=2" alt="" width="24" height="24" class="footer-logo-mark" />
-        <strong>Therdal</strong>
-        <span>Stakeholder signaling protocol for Ethereum</span>
+    <div class="md-container">
+      <!-- Compact One-Liner Donation Strip -->
+      <div id="donate" class="donate-oneliner">
+        <span class="donate-oneliner-text">Support Therdal — please consider donating <strong>ETH</strong> or <strong>USDC</strong> to</span>
+        <code class="donate-addr-code" id="donateAddressText">0x122900f6288b51998371ed90E2A424d63Ea9564E</code>
+        <button
+          type="button"
+          class="donate-copy-btn md-ripple"
+          data-copy-address="0x122900f6288b51998371ed90E2A424d63Ea9564E"
+          aria-label="Copy Ethereum donation address"
+        >
+          Copy
+        </button>
+        <button type="button" class="donate-inline-btn md-ripple" data-open-donate="ETH">
+          Donate
+        </button>
       </div>
-      <div class="footer-links">
-        <a href="#protocol">Protocol</a>
-        <a href="#contribute">Contribute</a>
-        <a href="#earn">Earn</a>
-        <a href="#fees">Fees</a>
-        <a href="#about">About</a>
-        <a href="./docs.html">Docs</a>
-        <a href="../frontend/index.html">Launch App</a>
+
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="./assets/logo-mark.svg?v=2" alt="" width="24" height="24" class="footer-logo-mark" />
+          <strong>Therdal</strong>
+          <span>Stakeholder signaling protocol for Ethereum</span>
+        </div>
+        <div class="footer-links">
+          <a href="#protocol">Protocol</a>
+          <a href="#contribute">Contribute</a>
+          <a href="#earn">Earn</a>
+          <a href="#fees">Fees</a>
+          <a href="#about">About</a>
+          <a href="./docs.html">Docs</a>
+          <a href="https://github.com/svylabs/therdal" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="../frontend/index.html">Launch App</a>
+        </div>
       </div>
     </div>
   </footer>
 
-  <script src="./src/material-v12.js?v=13"></script>
+  <!-- Interactive ETH / USDC Donation Modal -->
+  <div class="donate-modal-backdrop" id="donateModalBackdrop" hidden>
+    <div class="md-card md-card-elevated donate-modal" role="dialog" aria-modal="true" aria-labelledby="donateModalTitle">
+      <div class="donate-modal-head">
+        <div>
+          <span class="donate-kicker">Support Public-Goods Development</span>
+          <h3 id="donateModalTitle">Donate ETH or USDC</h3>
+        </div>
+        <button type="button" class="donate-close-btn" id="closeDonateModalBtn" aria-label="Close donation dialog">✕</button>
+      </div>
+
+      <p class="donate-modal-desc">
+        100% of your contribution supports open-source Therdal development on Ethereum Mainnet.
+      </p>
+
+      <div class="donate-asset-tabs" role="tablist" aria-label="Select donation currency">
+        <button type="button" class="donate-asset-tab active md-ripple" data-donate-asset="ETH" role="tab" aria-selected="true">
+          Donate ETH
+        </button>
+        <button type="button" class="donate-asset-tab md-ripple" data-donate-asset="USDC" role="tab" aria-selected="false">
+          Donate USDC
+        </button>
+      </div>
+
+      <div class="donate-presets" id="donatePresets">
+        <button type="button" class="donate-preset-chip active" data-donate-amount="0.01">0.01 ETH</button>
+        <button type="button" class="donate-preset-chip" data-donate-amount="0.05">0.05 ETH</button>
+        <button type="button" class="donate-preset-chip" data-donate-amount="0.1">0.1 ETH</button>
+        <button type="button" class="donate-preset-chip" data-donate-amount="0.5">0.5 ETH</button>
+      </div>
+
+      <label class="donate-field-label" for="donateAmountInput">Amount (<span id="donateAssetSymbol">ETH</span> on Ethereum Mainnet)</label>
+      <div class="donate-input-wrap">
+        <input
+          type="text"
+          inputmode="decimal"
+          id="donateAmountInput"
+          class="donate-amount-input"
+          value="0.01"
+          autocomplete="off"
+        />
+        <span class="donate-input-unit" id="donateInputUnit">ETH</span>
+      </div>
+
+      <div class="donate-modal-addr-box">
+        <span class="donate-modal-addr-label">Recipient Address (Ethereum Mainnet)</span>
+        <div class="donate-modal-addr-row">
+          <code>0x122900f6288b51998371ed90E2A424d63Ea9564E</code>
+          <button
+            type="button"
+            class="donate-copy-btn md-ripple"
+            data-copy-address="0x122900f6288b51998371ed90E2A424d63Ea9564E"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="donate-modal-actions">
+        <button type="button" class="md-btn md-btn-filled md-btn-lg md-ripple" id="sendWalletDonationBtn">
+          Send via Browser Wallet
+        </button>
+        <a
+          href="ethereum:0x122900f6288b51998371ed90E2A424d63Ea9564E@1?value=10000000000000000"
+          id="donateWalletUriLink"
+          class="md-btn md-btn-tonal md-ripple"
+        >
+          Open in Wallet App
+        </a>
+      </div>
+
+      <p class="donate-status" id="donateStatusMsg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <script src="./src/material-v12.js?v=15"></script>
 </body>
 </html>

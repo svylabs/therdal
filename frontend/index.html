@@ -3,33 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Therdal App — Stage 1: Topic Creation &amp; Registry</title>
+  <title>Therdal App — Stage 2: Direct Snapshot Voting &amp; Topic Registry</title>
   <link rel="icon" type="image/svg+xml" href="../website/assets/favicon.svg?v=2" />
   <link rel="icon" type="image/png" sizes="32x32" href="../website/assets/favicon-32x32.png?v=2" />
   <link rel="shortcut icon" href="../website/assets/favicon.ico?v=2" />
   <link rel="apple-touch-icon" sizes="180x180" href="../website/assets/apple-touch-icon.png?v=2" />
-  <link rel="stylesheet" href="./src/styles.css?v=4" />
+  <link rel="stylesheet" href="./src/styles.css?v=5" />
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
       <img src="../website/assets/favicon.svg?v=2" alt="Therdal" width="42" height="42" class="brand-logo" />
       <div>
-        <h1>Therdal App <span class="version-pill">Stage 1 · Topic Creation</span></h1>
-        <p class="subtitle">The voice of ETH holders · Register free-text subjects, custom options &amp; voting deadlines</p>
+        <h1>Therdal App <span class="version-pill">Stage 2 · Direct Snapshot Voting</span></h1>
+        <p class="subtitle">The voice of ETH holders · Vote directly with Execution ETH (MPT) or Beacon Staked ETH (SSZ) proofs</p>
       </div>
     </div>
     <div class="wallet-bar">
       <a href="../website/index.html" class="btn btn-outline btn-sm">← Protocol Website</a>
-      <a href="../website/docs.html#topics" class="btn btn-outline btn-sm">Docs</a>
+      <a href="../website/docs.html#direct-voting" class="btn btn-outline btn-sm">Docs</a>
       <div class="chain-status">
         <span class="dot"></span>
         <span id="chainClockBadge">Block #21,500,000</span>
       </div>
       <select id="activePersonaSelect" class="persona-select" title="Select Active Wallet">
-        <option value="alice">Wallet: Alice (0x19E7...ff2A)</option>
-        <option value="bob">Wallet: Bob (0x1563...5508)</option>
-        <option value="carol">Wallet: Carol (0x5CbD...07FB)</option>
+        <option value="alice">Wallet: Alice (25 ETH + 96 Staked ETH)</option>
+        <option value="bob">Wallet: Bob (14.5 ETH + 32 Staked ETH)</option>
+        <option value="carol">Wallet: Carol (40 ETH + 128 Staked ETH)</option>
       </select>
     </div>
   </header>
@@ -37,24 +37,25 @@
   <main class="container">
     <section class="invariant-banner">
       <div>
-        <strong>Stage 1 Protocol Invariants (<code>Therdal.sol</code>):</strong>
-        <span>Always Free Topic Creation (<code>$0</code> deposit · <code>$0</code> protocol fee)</span> ·
-        <span>2–16 unique free-text options per topic</span> ·
-        <span>Automatic parent block snapshot (<code>block.number - 1</code>)</span> ·
-        <span>Optional USDC sponsorship goes <code>100%</code> to pool</span>
+        <strong>Stage 2 Protocol Invariants (<code>Therdal.sol</code>):</strong>
+        <span>Direct Voting &amp; Topic Creation are Always Free (<code>$0</code> protocol fee · <code>0</code> SponsorEscrow used)</span> ·
+        <span>Execution ETH via RLP + EIP-1186 MPT (<code>THERDAL_WALLET</code>)</span> ·
+        <span>Beacon Staked ETH via EIP-4788 + Depth-40 SHA-256 SSZ (<code>0x01</code>/<code>0x02</code> · <code>THERDAL_VALIDATOR</code>)</span>
       </div>
     </section>
 
     <div class="grid-layout">
-      <!-- Left Column: Create Topic Form -->
+      <!-- Left Column: Active Wallet Holdings + Create Topic + Chain Clock -->
       <aside class="sidebar">
+        <div class="card" id="activeHoldingsCard"></div>
+
         <div class="card">
           <div class="card-header">
             <h2>Create a Topic</h2>
             <span class="badge badge-open">Always Free · $0 Fee</span>
           </div>
           <p class="muted-text">
-            Register a signaling topic on Ethereum by specifying the subject, custom free-text options, and when voting ends.
+            Register a signaling topic on Ethereum. Automatically pins parent <code>snapshotBlock = block.number - 1</code> and EIP-4788 <code>snapshotBeaconBlockRoot</code>.
           </p>
 
           <form id="createTopicForm" class="form-stack" novalidate>
@@ -138,7 +139,7 @@
         </div>
       </aside>
 
-      <!-- Right Column: Registered Topics List + Selected Topic Inspector -->
+      <!-- Right Column: Registered Topics List + Selected Topic Direct Voting + Event Log -->
       <section class="main-panel">
         <div class="card">
           <div class="card-header">
@@ -159,7 +160,7 @@
         <div class="card">
           <div class="card-header">
             <h2>On-Chain Event Log</h2>
-            <span class="mono-pill">ITopicRegistry Events</span>
+            <span class="mono-pill">ITopicRegistry &amp; IDirectVoting Events</span>
           </div>
           <div id="protocolEventLog" class="event-log"></div>
         </div>

@@ -1,4 +1,4 @@
-# Therdal Protocol v0.2 — Deposits, Sponsorship, 25/25/50 Fee Split & Refunds
+# Therdal Protocol v0.2 — Deposits, Sponsorship, 35/65 Operator Split & Refunds
 
 ## 1. Payment Asset & Smart-Account Controller (`TherdalController.sol`)
 
@@ -6,7 +6,6 @@
 - **Extensible Stablecoin Support**: `TherdalController` maintains an allowlist of USD stablecoins (`USDC`, and optionally `USDT`, `PYUSD`, `DAI`, `USDS`) with each token's `decimals` (`>= 6`), scaling USD micro-prices (`1e6`) cleanly to token base units via `amount = usdMicros * 10**(decimals - 6)`.
 - **Smart-Account Governance**:
   - `TherdalController` is initially operated by a single signer (`operator`), with `transferOperator(address newOperatorOrDao)` so control can transition seamlessly to a DAO / Timelock.
-  - `TherdalController` is the initial **Protocol Developer** recipient, holding earned developer settlement shares (`25%`), with `withdrawToken` and generic `execute` smart-account capabilities.
   - **Market-Updated Fee Parameters**: Per-vote fee parameters (`~$0.01 / vote` estimated) are constantly updated via `TherdalController` to reflect market realities (Ethereum gas, EIP-4844 blob costs, and off-chain STARK proving costs).
 
 ---
@@ -20,7 +19,7 @@
 
 ---
 
-## 3. Verified Settlement Fee & 25% / 25% / 50% Revenue Split
+## 3. Verified Settlement Fee & 35% Aggregator / 65% Prover Revenue Split
 
 When `settleBatch` proves a valid transition with `newlyAcceptedVoteCount` newly accepted valid votes:
 ```solidity
@@ -29,16 +28,15 @@ if (totalFee > remainingEscrow[resolutionId]) {
     revert InsufficientEscrowBalance(totalFee, remainingEscrow[resolutionId]);
 }
 ```
-If `totalFee > 0`, `remainingEscrow[resolutionId]` decreases by `totalFee` and `totalFee` (`F`) is split (example shown at the estimated `$0.01 / vote` rate):
+If `totalFee > 0`, `remainingEscrow[resolutionId]` decreases by `totalFee` and `totalFee` (`F`) is split between the batch submitter and prover (example shown at the estimated `$0.01 / vote` rate):
 
 | Recipient | Share | Formula | At 1,000 Votes (~$10 Est.) | At 10,000 Votes (~$100 Pool Est.) |
 | --- | --- | --- | --- | --- |
-| **Protocol Developer (`TherdalController`)** | **25%** | `devShare = F / 4` | `$2.50` | `$25.00` |
-| **Blob Submitter / Frontend (`batch.submitter`)** | **25%** | `submitterShare = F / 4` | `$2.50` | `$25.00` |
-| **Successful STARK Prover (`msg.sender`)** | **50%** | `proverShare = F - devShare - submitterShare` | `$5.00` | `$50.00` |
+| **Blob Submitter / Aggregator (`batch.submitter`)** | **35%** | `submitterShare = (F * 35) / 100` | `$3.50` | `$35.00` |
+| **Successful STARK Prover (`msg.sender`)** | **65%** | `proverShare = F - submitterShare` | `$6.50` | `$65.00` |
 | **Total** | **100%** | `F` | `$10.00` | `$100.00` |
 
-- Submitters receive `$0` at blob publication; their `25%` share is unlocked strictly when a prover settles their batch.
+- Submitters receive `$0` at blob publication; their `35%` share is unlocked strictly when a prover settles their batch.
 - If a direct ERC-20 `transfer` to any recipient fails (e.g. blacklisted address), the exact share is credited to `claimableTokenRewards[token][recipient]` so settlement cannot be DoS-blocked.
 
 ---

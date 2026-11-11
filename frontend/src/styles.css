@@ -574,3 +574,217 @@ body {
 .log-entry {
   color: #a5b4fc;
 }
+
+/* Stage 2: Direct Snapshot Voting Styles */
+
+.holdings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.48rem;
+}
+
+.holding-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.52rem 0.7rem;
+  font-size: 0.82rem;
+}
+
+.cred-pill {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.08rem 0.42rem;
+  font-size: 0.69rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: rgba(79, 140, 255, 0.14);
+  color: #93c5fd;
+  border: 1px solid rgba(79, 140, 255, 0.32);
+  border-radius: 999px;
+}
+
+.eth-amount {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: #6ee7b7;
+  white-space: nowrap;
+}
+
+.section-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.tally-option-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.48rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 0.65rem 0.82rem;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.tally-option-card:hover {
+  border-color: rgba(79, 140, 255, 0.55);
+}
+
+.tally-option-card.selected-choice {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+  background: rgba(79, 140, 255, 0.08);
+}
+
+.tally-option-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tally-option-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.tally-option-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem;
+}
+
+.muted-inline {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.tally-bar-track {
+  width: 100%;
+  height: 7px;
+  background: #0b101c;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tally-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.direct-vote-panel {
+  margin-top: 1rem;
+  background: #0d1322;
+  border: 1px solid rgba(79, 140, 255, 0.35);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+
+.proof-positions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.48rem;
+  margin: 0.7rem 0 0.85rem;
+}
+
+.proof-position-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+.proof-position-item.already-counted {
+  opacity: 0.72;
+}
+
+.proof-pos-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.proof-pos-left input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.proof-pos-right {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.vote-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.proof-inspector {
+  margin-top: 0.95rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 0.65rem 0.85rem;
+}
+
+.proof-inspector summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #93c5fd;
+}
+
+.receipts-box {
+  margin-top: 0.75rem;
+  background: #080b12;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.receipts-box .k {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+

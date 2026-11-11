@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "topics",
+    "voting",
     "cli",
 ]
 

@@ -160,13 +160,21 @@ impl<C: ChainClock, S: TopicStore> TopicRegistryService<C, S> {
                 current_block_number: 0,
             });
         }
+        let snapshot_block = current_block - 1;
+        let snapshot_block_hash = self.clock.parent_block_hash(snapshot_block);
+        self.create_topic_with_pinned_snapshot(req, snapshot_block, snapshot_block_hash)
+    }
 
+    /// Registers a new topic with an explicitly resolved parent snapshot block and hash.
+    pub fn create_topic_with_pinned_snapshot(
+        &mut self,
+        req: CreateTopicRequest,
+        snapshot_block: u64,
+        snapshot_block_hash: [u8; 32],
+    ) -> Result<TopicView, TopicError> {
         let now = self.clock.now_timestamp();
         let content_hash =
             validate_and_hash(&req.subject, &req.options, req.voting_ends_at, now)?;
-
-        let snapshot_block = current_block - 1;
-        let snapshot_block_hash = self.clock.parent_block_hash(snapshot_block);
 
         let mut topics = self.store.load_topics()?;
         let next_id = (topics.len() as u64) + 1;
