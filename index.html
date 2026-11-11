@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta name="description" content="The voice of ETH holders. A permissionless and verifiable stakeholder signaling protocol for Ethereum." />
+  <title>Therdal — A Permissionless and Verifiable Stakeholder Signaling Protocol for Ethereum</title>
+  <link rel="canonical" href="https://therdal.org/" />
+  <meta property="og:site_name" content="Therdal" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://therdal.org/" />
+  <meta property="og:title" content="Therdal — The voice of ETH holders." />
+  <meta property="og:description" content="A permissionless and verifiable stakeholder signaling protocol for Ethereum." />
+  <meta property="og:image" content="https://therdal.org/assets/apple-touch-icon.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Therdal — The voice of ETH holders." />
+  <meta name="twitter:description" content="A permissionless and verifiable stakeholder signaling protocol for Ethereum." />
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png?v=2" />
+  <link rel="shortcut icon" href="./assets/favicon.ico?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/material-v11.css?v=18" />
+</head>
+<body>
+  <!-- Material Design 3 Top App Bar -->
+  <header class="md-top-bar">
+    <div class="md-container top-bar-inner">
+      <a href="#top" class="md-brand">
+        <img src="./assets/favicon.svg?v=2" alt="" width="38" height="38" class="md-brand-logo" />
+        <span class="md-brand-text">Therdal</span>
+      </a>
+
+      <nav class="md-nav" aria-label="Main navigation">
+        <a href="#protocol" class="md-nav-link md-ripple">Protocol</a>
+        <a href="#contribute" class="md-nav-link md-ripple">Contribute</a>
+        <a href="#earn" class="md-nav-link md-ripple">Earn</a>
+        <a href="#fees" class="md-nav-link md-ripple">Fees</a>
+        <a href="#about" class="md-nav-link md-ripple">About</a>
+        <a href="./docs.html" class="md-nav-link md-ripple">Docs</a>
+      </nav>
+
+      <div class="top-bar-actions">
+        <a
+          href="https://github.com/svylabs/therdal"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="md-github-btn md-ripple"
+          aria-label="Therdal GitHub Repository"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
+          </svg>
+          <span>GitHub</span>
+        </a>
+        <a href="./frontend/index.html" class="md-btn md-btn-filled md-ripple">
+          <span>Launch App</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17L17 7M9 7h8v8" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero-section">
+      <div class="md-container hero-grid">
+        <!-- Positioning Lockup -->
+        <div class="hero-copy">
+          <div class="hero-eyebrow">THERDAL</div>
+          <h1 class="md-display">The voice of ETH holders.</h1>
+          <p class="md-subhead">
+            A permissionless and verifiable stakeholder signaling protocol for Ethereum.
+          </p>
+
+          <div class="hero-actions">
+            <a href="./frontend/index.html" class="md-btn md-btn-filled md-btn-lg md-ripple">
+              <span>Launch App</span>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 17L17 7M9 7h8v8" />
+              </svg>
+            </a>
+            <a href="./frontend/index.html#create" class="md-btn md-btn-tonal md-btn-lg md-ripple">
+              <span>Create a Topic</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Live Interactive Signal Card (Custom Creator-Defined Options) -->
+        <div class="md-card md-card-elevated signal-card" aria-label="Example Ethereum Stakeholder Signal">
+          <div class="signal-card-top">
+            <div class="md-chip-group" role="tablist" aria-label="Example topics">
+              <button type="button" class="md-chip active md-ripple" data-topic="0">Blob Capacity</button>
+              <button type="button" class="md-chip md-ripple" data-topic="1">L1 Gas Limit</button>
+              <button type="button" class="md-chip md-ripple" data-topic="2">Staking Curve</button>
+            </div>
+            <span class="verified-pill">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+                <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.1 13.5L7.4 12l1.41-1.41 2.09 2.09 4.29-4.29L16.6 9.8l-5.7 5.7z" />
+              </svg>
+              Verified on Ethereum
+            </span>
+          </div>
+
+          <h2 class="signal-question" id="heroTopicQuestion">
+            What target blob count should the next upgrade adopt?
+          </h2>
+
+          <!-- Dynamic Topic-Defined Options -->
+          <div class="tally-stack" id="heroOptionsStack">
+            <div class="tally-row">
+              <div class="tally-label">
+                <span class="tally-choice choice-lead">12 Blobs per Block</span>
+                <span class="tally-meta"><strong>58%</strong> · <span>1.12M ETH</span></span>
+              </div>
+              <div class="md-progress">
+                <div class="md-progress-fill fill-primary" style="width: 58%"></div>
+              </div>
+            </div>
+
+            <div class="tally-row">
+              <div class="tally-label">
+                <span class="tally-choice">9 Blobs per Block</span>
+                <span class="tally-meta"><strong>29%</strong> · <span>558K ETH</span></span>
+              </div>
+              <div class="md-progress">
+                <div class="md-progress-fill fill-tertiary" style="width: 29%"></div>
+              </div>
+            </div>
+
+            <div class="tally-row">
+              <div class="tally-label">
+                <span class="tally-choice choice-muted">Keep at 6 Blobs</span>
+                <span class="tally-meta"><strong>13%</strong> · <span>250K ETH</span></span>
+              </div>
+              <div class="md-progress">
+                <div class="md-progress-fill fill-neutral" style="width: 13%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-footer">
+            <div class="stake-pill">
+              <span class="dot dot-primary"></span>
+              <span>Wallets <strong id="heroWalletsEth">588K ETH</strong></span>
+            </div>
+            <div class="stake-pill">
+              <span class="dot dot-tertiary"></span>
+              <span>Validators <strong id="heroValidatorsEth">1.34M ETH</strong></span>
+            </div>
+            <span class="nonbinding-tag">Custom Options · Nonbinding</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROTOCOL SECTION -->
+    <section id="protocol" class="md-section">
+      <div class="md-container">
+        <div class="section-head">
+          <span class="section-label">Protocol</span>
+          <h2 class="md-headline">How Therdal works</h2>
+          <p class="section-sub">Four simple steps across independent roles—voters just sign their choice.</p>
+        </div>
+
+        <!-- 4 Steps Overview Bar at Top of Protocol -->
+        <div class="protocol-steps-top" aria-label="Four protocol steps overview">
+          <a href="#proto-step-1" class="md-card md-card-surface proto-step-pill active md-ripple" data-step-link="0">
+            <span class="step-num-badge">1</span>
+            <div class="proto-step-text">
+              <span class="proto-step-actor">Topic Creator</span>
+              <strong>Create a Topic</strong>
+              <span class="proto-step-desc">Set question &amp; choices</span>
+            </div>
+          </a>
+
+          <a href="#proto-step-2" class="md-card md-card-surface proto-step-pill md-ripple" data-step-link="1">
+            <span class="step-num-badge">2</span>
+            <div class="proto-step-text">
+              <span class="proto-step-actor actor-tone-tertiary">ETH Holders</span>
+              <strong>Cast Your Vote</strong>
+              <span class="proto-step-desc">Free offline or direct</span>
+            </div>
+          </a>
+
+          <a href="#proto-step-3" class="md-card md-card-surface proto-step-pill md-ripple" data-step-link="2">
+            <span class="step-num-badge">3</span>
+            <div class="proto-step-text">
+              <span class="proto-step-actor">Vote Aggregator</span>
+              <strong>Bundle Votes</strong>
+              <span class="proto-step-desc">Collect &amp; post batches</span>
+            </div>
+          </a>
+
+          <a href="#proto-step-4" class="md-card md-card-surface proto-step-pill md-ripple" data-step-link="3">
+            <span class="step-num-badge">4</span>
+            <div class="proto-step-text">
+              <span class="proto-step-actor actor-tone-purple">Batch Prover</span>
+              <strong>Verify Results</strong>
+              <span class="proto-step-desc">Prove &amp; finalize tally</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 4 Alternating Visual + User-Friendly Description Rows -->
+        <div class="proto-alternating-stack">
+          <!-- STEP 1: Image Left, Description Right -->
+          <article id="proto-step-1" class="proto-row">
+            <div class="md-card md-card-elevated proto-visual-box">
+              <svg viewBox="0 0 480 260" class="step-svg" aria-label="Step 1: Topic Creator Launches a Topic and Records Block-Header Snapshot">
+                <!-- Topic Card -->
+                <rect x="24" y="28" width="212" height="204" rx="20" fill="#222733" stroke="#3c4456" stroke-width="1.5" />
+                <rect x="44" y="48" width="112" height="24" rx="12" fill="#284777" />
+                <text x="100" y="64" text-anchor="middle" fill="#d6e3ff" font-size="10.5" font-weight="600">Topic Creator</text>
+                <text x="44" y="96" fill="#ffffff" font-size="14.5" font-weight="700">Target Blob Limit?</text>
+
+                <!-- Custom Options Defined at Creation -->
+                <text x="44" y="120" fill="#8b92a2" font-size="9.5" font-weight="600">CUSTOM CHOICES</text>
+                <rect x="44" y="130" width="52" height="26" rx="7" fill="#181c24" stroke="#3a4559" />
+                <text x="70" y="147" text-anchor="middle" fill="#d6e3ff" font-size="10.5" font-weight="600">12</text>
+                <rect x="102" y="130" width="52" height="26" rx="7" fill="#181c24" stroke="#3a4559" />
+                <text x="128" y="147" text-anchor="middle" fill="#d6e3ff" font-size="10.5" font-weight="600">9</text>
+                <rect x="160" y="130" width="56" height="26" rx="7" fill="#181c24" stroke="#3a4559" />
+                <text x="188" y="147" text-anchor="middle" fill="#d6e3ff" font-size="10.5" font-weight="600">Keep 6</text>
+
+                <rect x="44" y="172" width="172" height="38" rx="10" fill="#181c24" />
+                <text x="130" y="195" text-anchor="middle" fill="#b8bfce" font-size="11" font-weight="500">Published on Ethereum</text>
+
+                <!-- Arrow -->
+                <path d="M 236 130 L 268 130" stroke="#aac7ff" stroke-width="2" stroke-dasharray="4 4" />
+                <polygon points="272,130 264,125 264,135" fill="#aac7ff" />
+
+                <!-- Snapshot Recorded on Ethereum -->
+                <rect x="272" y="38" width="184" height="184" rx="20" fill="#1e2a3d" stroke="#aac7ff" stroke-width="1.5" />
+                <text x="364" y="68" text-anchor="middle" fill="#d6e3ff" font-size="10.5" font-weight="700">SNAPSHOT AT CREATION</text>
+                <text x="364" y="95" text-anchor="middle" fill="#ffffff" font-size="15.5" font-weight="700">Block Headers</text>
+                <rect x="286" y="112" width="156" height="32" rx="8" fill="#162030" />
+                <text x="364" y="132" text-anchor="middle" fill="#b8bfce" font-size="11">Execution &amp; Beacon</text>
+                <rect x="286" y="152" width="156" height="34" rx="8" fill="#1c4e3c" />
+                <text x="364" y="173" text-anchor="middle" fill="#b6f2d8" font-size="11.5" font-weight="600">ETH Never Locked</text>
+              </svg>
+            </div>
+
+            <div class="proto-copy-box">
+              <div class="step-meta-row">
+                <span class="step-pill">Step 1</span>
+                <span class="step-actor-badge actor-badge-primary">Topic Creator</span>
+              </div>
+              <h3>Create a Topic &amp; Set the Choices</h3>
+              <p>
+                Ask a question and define custom voting options. Creation snapshots Ethereum block headers at that moment—moving or buying ETH later has no effect, and ETH is never locked.
+              </p>
+              <div class="proto-tags">
+                <span class="md-tonal-badge badge-primary">Custom Choices</span>
+                <span class="md-tonal-badge badge-tertiary">Block Header Snapshot</span>
+                <span class="md-tonal-badge badge-secondary">ETH Never Locked</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- STEP 2: Description Left, Image Right -->
+          <article id="proto-step-2" class="proto-row proto-row-reverse">
+            <div class="md-card md-card-elevated proto-visual-box">
+              <svg viewBox="0 0 480 260" class="step-svg" aria-label="Step 2: ETH Holders Cast Their Vote Offline or Directly">
+                <!-- Stake Sources -->
+                <rect x="20" y="38" width="188" height="78" rx="16" fill="#222733" stroke="#3c4456" />
+                <circle cx="48" cy="77" r="15" fill="#284777" />
+                <text x="48" y="82" text-anchor="middle" fill="#d6e3ff" font-size="13" font-weight="700">Ξ</text>
+                <text x="72" y="71" fill="#ffffff" font-size="13" font-weight="600">Wallet ETH</text>
+                <text x="72" y="90" fill="#9aa2b2" font-size="11">Hot &amp; cold wallets</text>
+
+                <rect x="20" y="144" width="188" height="78" rx="16" fill="#222733" stroke="#3c4456" />
+                <circle cx="48" cy="183" r="15" fill="#1c4e3c" />
+                <text x="48" y="188" text-anchor="middle" fill="#b6f2d8" font-size="13" font-weight="700">V</text>
+                <text x="72" y="177" fill="#ffffff" font-size="13" font-weight="600">Staked ETH</text>
+                <text x="72" y="196" fill="#9aa2b2" font-size="11">Active validators</text>
+
+                <!-- Merge Connectors -->
+                <path d="M 208 77 C 232 77, 232 130, 256 130" fill="none" stroke="#aac7ff" stroke-width="2" stroke-dasharray="4 4" />
+                <path d="M 208 183 C 232 183, 232 130, 256 130" fill="none" stroke="#7dd8b6" stroke-width="2" stroke-dasharray="4 4" />
+
+                <!-- Ballot Modes -->
+                <rect x="256" y="34" width="200" height="192" rx="20" fill="#1f2633" stroke="#7dd8b6" stroke-width="1.5" />
+                <text x="356" y="60" text-anchor="middle" fill="#7dd8b6" font-size="10.5" font-weight="700">ETH HOLDERS</text>
+                <text x="356" y="82" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="700">Pick Any Option</text>
+
+                <rect x="276" y="98" width="160" height="46" rx="12" fill="#1c4e3c" />
+                <text x="356" y="118" text-anchor="middle" fill="#b6f2d8" font-size="12" font-weight="700">Sign Offline — $0 Gas</text>
+                <text x="356" y="135" text-anchor="middle" fill="#8ce0be" font-size="10.5">Done in one signature</text>
+
+                <rect x="276" y="154" width="160" height="48" rx="12" fill="#2b3140" />
+                <text x="356" y="175" text-anchor="middle" fill="#dae2f9" font-size="12" font-weight="600">or Vote Directly</text>
+                <text x="356" y="192" text-anchor="middle" fill="#9aa2b2" font-size="10.5">Always free ($0 fee)</text>
+              </svg>
+            </div>
+
+            <div class="proto-copy-box">
+              <div class="step-meta-row">
+                <span class="step-pill">Step 2</span>
+                <span class="step-actor-badge actor-badge-tertiary">ETH Holders</span>
+              </div>
+              <h3>Cast Your Vote—Offline or Direct</h3>
+              <p>
+                Pick an option using your wallet and staked ETH. Sign offline for $0 gas—keeping cold wallets safe—or vote directly on Ethereum. Once you vote, you're done.
+              </p>
+              <div class="proto-tags">
+                <span class="md-tonal-badge badge-tertiary">Done in One Step</span>
+                <span class="md-tonal-badge badge-primary">Wallets &amp; Validators</span>
+                <span class="md-tonal-badge badge-secondary">Cold Wallets Stay Safe</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- STEP 3: Image Left, Description Right -->
+          <article id="proto-step-3" class="proto-row">
+            <div class="md-card md-card-elevated proto-visual-box">
+              <svg viewBox="0 0 480 260" class="step-svg" aria-label="Step 3: Vote Aggregators Bundle Votes and Post to Ethereum">
+                <!-- Signed Ballots Stack -->
+                <rect x="24" y="42" width="122" height="46" rx="12" fill="#222733" stroke="#3c4456" />
+                <text x="85" y="69" text-anchor="middle" fill="#d6e3ff" font-size="12" font-weight="600">Offline Vote #1</text>
+
+                <rect x="24" y="107" width="122" height="46" rx="12" fill="#222733" stroke="#3c4456" />
+                <text x="85" y="134" text-anchor="middle" fill="#d6e3ff" font-size="12" font-weight="600">Offline Vote #2</text>
+
+                <rect x="24" y="172" width="122" height="46" rx="12" fill="#222733" stroke="#3c4456" />
+                <text x="85" y="199" text-anchor="middle" fill="#d6e3ff" font-size="12" font-weight="600">Offline Vote #N</text>
+
+                <!-- Funnel Lines -->
+                <path d="M 146 65 L 184 130 M 146 130 L 184 130 M 146 195 L 184 130" stroke="#8b92a2" stroke-width="1.8" stroke-dasharray="3 3" />
+
+                <!-- Aggregator UI -->
+                <rect x="184" y="74" width="126" height="112" rx="18" fill="#283142" stroke="#aac7ff" />
+                <text x="247" y="112" text-anchor="middle" fill="#ffffff" font-size="13.5" font-weight="700">Vote Aggregator</text>
+                <text x="247" y="133" text-anchor="middle" fill="#b8bfce" font-size="11">Voting Frontend</text>
+                <text x="247" y="153" text-anchor="middle" fill="#aac7ff" font-size="11" font-weight="600">Bundles Votes</text>
+
+                <!-- Arrow to Batch -->
+                <path d="M 310 130 L 336 130" stroke="#aac7ff" stroke-width="2" />
+                <polygon points="340,130 332,125 332,135" fill="#aac7ff" />
+
+                <!-- Ethereum Batch -->
+                <rect x="340" y="54" width="116" height="152" rx="20" fill="#1e2a3d" stroke="#aac7ff" stroke-width="1.5" />
+                <circle cx="398" cy="100" r="22" fill="#284777" />
+                <text x="398" y="104" text-anchor="middle" fill="#d6e3ff" font-size="11" font-weight="700">BATCH</text>
+                <text x="398" y="144" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">On Ethereum</text>
+                <text x="398" y="164" text-anchor="middle" fill="#9aa2b2" font-size="11">Public Blob</text>
+                <text x="398" y="182" text-anchor="middle" fill="#7dd8b6" font-size="11" font-weight="600">Low Cost</text>
+              </svg>
+            </div>
+
+            <div class="proto-copy-box">
+              <div class="step-meta-row">
+                <span class="step-pill">Step 3</span>
+                <span class="step-actor-badge actor-badge-primary">Vote Aggregator</span>
+              </div>
+              <h3>Bundle Votes Together</h3>
+              <p>
+                Aggregators host voting frontends, collect offline signatures, and post thousands together on Ethereum in one batch. Anyone can run one, preventing censorship.
+              </p>
+              <div class="proto-tags">
+                <span class="md-tonal-badge badge-primary">Permissionless</span>
+                <span class="md-tonal-badge badge-secondary">No Single Gatekeeper</span>
+                <span class="md-tonal-badge badge-tertiary">Publicly Auditable</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- STEP 4: Description Left, Image Right -->
+          <article id="proto-step-4" class="proto-row proto-row-reverse">
+            <div class="md-card md-card-elevated proto-visual-box">
+              <svg viewBox="0 0 480 260" class="step-svg" aria-label="Step 4: Batch Provers Cryptographically Verify and Finalize the Tally">
+                <!-- Proof Box -->
+                <rect x="24" y="38" width="194" height="184" rx="20" fill="#222733" stroke="#7dd8b6" stroke-width="1.5" />
+                <text x="44" y="64" fill="#d9b9ff" font-size="10" font-weight="700">BATCH PROVER</text>
+                <text x="44" y="84" fill="#ffffff" font-size="14" font-weight="700">Validity Proof</text>
+                <rect x="44" y="98" width="154" height="30" rx="8" fill="#181c24" />
+                <text x="56" y="117" fill="#b6f2d8" font-size="11.5" font-weight="600">✓ Genuine Signatures</text>
+                <rect x="44" y="136" width="154" height="30" rx="8" fill="#181c24" />
+                <text x="56" y="155" fill="#b6f2d8" font-size="11.5" font-weight="600">✓ Snapshot Balances</text>
+                <rect x="44" y="174" width="154" height="30" rx="8" fill="#181c24" />
+                <text x="56" y="193" fill="#b6f2d8" font-size="11.5" font-weight="600">✓ No Double Counting</text>
+
+                <!-- Arrow -->
+                <path d="M 218 130 L 256 130" stroke="#7dd8b6" stroke-width="2" />
+                <polygon points="260,130 252,125 252,135" fill="#7dd8b6" />
+
+                <!-- Final Result on Ethereum -->
+                <rect x="260" y="38" width="196" height="184" rx="20" fill="#1e2a3d" stroke="#aac7ff" stroke-width="1.5" />
+                <text x="358" y="68" text-anchor="middle" fill="#d6e3ff" font-size="10.5" font-weight="700">VERIFIED ON ETHEREUM</text>
+                <text x="358" y="93" text-anchor="middle" fill="#ffffff" font-size="15.5" font-weight="700">Public ETH Tally</text>
+
+                <rect x="280" y="110" width="156" height="28" rx="7" fill="#162030" />
+                <text x="292" y="128" fill="#aac7ff" font-size="11" font-weight="600">12 Blobs</text>
+                <text x="424" y="128" text-anchor="end" fill="#ffffff" font-size="11" font-weight="700">58%</text>
+
+                <rect x="280" y="144" width="156" height="28" rx="7" fill="#162030" />
+                <text x="292" y="162" fill="#7dd8b6" font-size="11" font-weight="600">9 Blobs</text>
+                <text x="424" y="162" text-anchor="end" fill="#ffffff" font-size="11" font-weight="700">29%</text>
+
+                <rect x="280" y="178" width="156" height="28" rx="7" fill="#162030" />
+                <text x="292" y="196" fill="#9aa2b2" font-size="11" font-weight="600">Keep 6</text>
+                <text x="424" y="196" text-anchor="end" fill="#ffffff" font-size="11" font-weight="700">13%</text>
+              </svg>
+            </div>
+
+            <div class="proto-copy-box">
+              <div class="step-meta-row">
+                <span class="step-pill">Step 4</span>
+                <span class="step-actor-badge actor-badge-purple">Batch Prover</span>
+              </div>
+              <h3>Verify &amp; Finalize the Tally</h3>
+              <p>
+                Provers generate a cryptographic proof checking signatures, snapshot ETH balances, and uniqueness. Ethereum verifies the proof in one step and updates the public tally.
+              </p>
+              <div class="proto-tags">
+                <span class="md-tonal-badge badge-purple">Math, Not Trust</span>
+                <span class="md-tonal-badge badge-tertiary">Zero Double Votes</span>
+                <span class="md-tonal-badge badge-primary">On-Chain Tally</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTRIBUTE SECTION -->
+    <section id="contribute" class="md-section">
+      <div class="md-container">
+        <div class="section-head">
+          <span class="section-label">Contribute</span>
+          <h2 class="md-headline">Participate as an ETH stakeholder</h2>
+          <p class="section-sub">Create a topic, vote with your ETH, or sponsor free voting.</p>
+        </div>
+
+        <!-- 3 Contributor Cards -->
+        <div class="contributors-grid">
+          <!-- Create Topic -->
+          <article class="md-card md-card-surface actor-card">
+            <div class="actor-card-head">
+              <span class="md-icon-box box-primary" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </span>
+              <span class="md-tonal-badge badge-primary">Custom Choices</span>
+            </div>
+            <h3>Create a Topic</h3>
+            <p class="actor-role-line">Ask a question &amp; set options</p>
+            <p class="actor-desc">Post a topic on Ethereum with custom options and snapshot block headers at creation.</p>
+          </article>
+
+          <!-- Vote -->
+          <article class="md-card md-card-surface actor-card">
+            <div class="actor-card-head">
+              <span class="md-icon-box box-tertiary" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 12l2 2 4-4" />
+                  <rect x="3" y="4" width="18" height="16" rx="4" />
+                </svg>
+              </span>
+              <span class="md-tonal-badge badge-tertiary">Offline or Direct</span>
+            </div>
+            <h3>Vote</h3>
+            <p class="actor-role-line">Signal with wallet &amp; staked ETH</p>
+            <p class="actor-desc">Pick an option offline for $0 gas or vote directly on Ethereum.</p>
+          </article>
+
+          <!-- Sponsor Gas-Free Transactions -->
+          <article class="md-card md-card-surface actor-card">
+            <div class="actor-card-head">
+              <span class="md-icon-box box-secondary" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </span>
+              <span class="md-tonal-badge badge-secondary">Unused Refunded</span>
+            </div>
+            <h3>Sponsor Free Votes</h3>
+            <p class="actor-role-line">Fund gas-free voting</p>
+            <p class="actor-desc">Top up any topic's pool so more holders vote free. Unspent funds return automatically.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- EARN SECTION -->
+    <section id="earn" class="md-section">
+      <div class="md-container">
+        <div class="section-head">
+          <span class="section-label">Earn</span>
+          <h2 class="md-headline">Earn revenue on every valid vote</h2>
+          <p class="section-sub">All sponsored vote fees go directly to Aggregators (35%) and Provers (65%).</p>
+        </div>
+
+        <!-- 2 Operator Cards: Aggregators & Provers -->
+        <div class="earn-grid">
+          <!-- Aggregators -->
+          <article class="md-card md-card-surface earn-card">
+            <div class="actor-card-head">
+              <span class="md-icon-box box-primary" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="12" rx="3" />
+                  <path d="M7 20h10M12 16v4" />
+                </svg>
+              </span>
+              <span class="md-tonal-badge badge-primary">35% per Valid Vote</span>
+            </div>
+            <h3>Aggregators</h3>
+            <p class="actor-role-line">Host voting frontends &amp; post batches</p>
+            <p class="actor-desc">
+              Collect offline votes and post bundled batches to Ethereum. Earn from sponsored funds once proven.
+            </p>
+            <div class="earn-steps" aria-label="Aggregator workflow">
+              <span class="step-chip">Host Voting UI</span>
+              <span class="step-arrow">→</span>
+              <span class="step-chip">Post Batch</span>
+              <span class="step-arrow">→</span>
+              <span class="step-chip step-chip-accent">Earn 35%</span>
+            </div>
+          </article>
+
+          <!-- Provers -->
+          <article class="md-card md-card-surface earn-card">
+            <div class="actor-card-head">
+              <span class="md-icon-box box-tertiary" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3l7 3v5c0 4.8-3 9.1-7 10-4-.9-7-5.2-7-10V6l7-3z" />
+                  <path d="M9.5 12l1.8 1.8 3.5-3.6" />
+                </svg>
+              </span>
+              <span class="md-tonal-badge badge-tertiary">65% per Valid Vote</span>
+            </div>
+            <h3>Provers</h3>
+            <p class="actor-role-line">Prove batch validity &amp; finalize tallies</p>
+            <p class="actor-desc">
+              Verify batch signatures, snapshot balances, and uniqueness—earning for every valid vote proven.
+            </p>
+            <div class="earn-steps" aria-label="Prover workflow">
+              <span class="step-chip">Read Batch</span>
+              <span class="step-arrow">→</span>
+              <span class="step-chip">Prove Validity</span>
+              <span class="step-arrow">→</span>
+              <span class="step-chip step-chip-tertiary">Earn 65%</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEDICATED FEES SECTION -->
+    <section id="fees" class="md-section">
+      <div class="md-container">
+        <div class="section-head">
+          <span class="section-label">Fees</span>
+          <h2 class="md-headline">Transparent fees at every step</h2>
+          <p class="section-sub">Creating a topic and voting are always free—all sponsored vote fees go to Aggregators (35%) and Provers (65%).</p>
+        </div>
+
+        <!-- Step-by-Step Fee Cards -->
+        <div class="fees-steps-grid">
+          <!-- Fee Card 1: Creating a Poll / Topic -->
+          <article class="md-card md-card-surface fee-step-card">
+            <div class="fee-card-top">
+              <div>
+                <span class="fee-step-kicker">Topic Creator</span>
+                <h3>Creating a Poll / Topic</h3>
+              </div>
+              <span class="fee-price-pill pill-tertiary">Always Free</span>
+            </div>
+
+            <p class="fee-card-desc">
+              Anyone can create a topic for free—no upfront deposit and no protocol fee.
+            </p>
+
+            <div class="fee-mode-rows">
+              <div class="fee-mode-row">
+                <span><strong>Create Topic</strong></span>
+                <strong class="mode-free">Always Free ($0 Fee)</strong>
+              </div>
+              <div class="fee-mode-row">
+                <span><strong>Optional Sponsorship</strong></span>
+                <strong class="mode-primary">100% to Pool · Refundable</strong>
+              </div>
+            </div>
+          </article>
+
+          <!-- Fee Card 2: Direct & Offline Voting -->
+          <article class="md-card md-card-surface fee-step-card">
+            <div class="fee-card-top">
+              <div>
+                <span class="fee-step-kicker">ETH Holders</span>
+                <h3>Voting</h3>
+              </div>
+              <span class="fee-price-pill pill-tertiary">Always Free</span>
+            </div>
+
+            <p class="fee-card-desc">
+              Zero protocol fees whether voting directly on Ethereum or signing offline.
+            </p>
+
+            <div class="fee-mode-rows">
+              <div class="fee-mode-row">
+                <span><strong>Direct Voting</strong></span>
+                <strong class="mode-free">Always Free</strong>
+              </div>
+              <div class="fee-mode-row">
+                <span><strong>Offline Voting</strong></span>
+                <strong class="mode-free">$0 Gas &amp; $0 Fee</strong>
+              </div>
+            </div>
+          </article>
+
+          <!-- Fee Card 3: Submitting a Vote Batch -->
+          <article class="md-card md-card-surface fee-step-card">
+            <div class="fee-card-top">
+              <div>
+                <span class="fee-step-kicker">Vote Aggregator</span>
+                <h3>Submitting a Vote Batch</h3>
+              </div>
+              <span class="fee-price-pill pill-primary">35% Share</span>
+            </div>
+
+            <p class="fee-card-desc">
+              Free to submit; earns 35% of the vote fee from the sponsored pool once the batch is proven.
+            </p>
+
+            <div class="fee-mode-rows">
+              <div class="fee-mode-row">
+                <span><strong>Submit Batch</strong></span>
+                <strong>$0 Protocol Fee</strong>
+              </div>
+              <div class="fee-mode-row">
+                <span><strong>When Proven</strong></span>
+                <strong class="mode-primary">35% (~$0.0035 / vote est.)</strong>
+              </div>
+            </div>
+          </article>
+
+          <!-- Fee Card 4: Proving a Vote Batch -->
+          <article class="md-card md-card-surface fee-step-card">
+            <div class="fee-card-top">
+              <div>
+                <span class="fee-step-kicker">Batch Prover</span>
+                <h3>Proving a Vote Batch</h3>
+              </div>
+              <span class="fee-price-pill pill-tertiary">65% Share</span>
+            </div>
+
+            <p class="fee-card-desc">
+              Proving releases an estimated <strong>~$0.01 per valid vote</strong>—split <strong>65% Prover</strong> and <strong>35% Aggregator</strong>.
+            </p>
+
+            <div class="fee-mode-rows">
+              <div class="fee-mode-row">
+                <span><strong>Prover Share</strong></span>
+                <strong class="mode-free">65% (~$0.0065 / vote est.)</strong>
+              </div>
+              <div class="fee-mode-row">
+                <span><strong>Invalid / Duplicate Votes</strong></span>
+                <strong>$0 Charged</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Visual Fee Split During Submitting & Proving + Interactive Topic Calculator -->
+        <div class="md-card md-card-elevated split-card">
+          <!-- Left: Visual Ring Chart of Fee Split During Submitting & Proving -->
+          <div class="split-visual-col">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 160 160" class="donut-svg" aria-label="Fee split during batch submission and proving: 65% Prover, 35% Aggregator">
+                <circle cx="80" cy="80" r="56" fill="none" stroke="#282a2f" stroke-width="20" />
+                <!-- 65% Prover -->
+                <circle cx="80" cy="80" r="56" fill="none" stroke="#7dd8b6" stroke-width="20" stroke-dasharray="205 352" stroke-dashoffset="-12" stroke-linecap="round" transform="rotate(-90 80 80)" />
+                <!-- 35% Batch Submitter / Aggregator -->
+                <circle cx="80" cy="80" r="56" fill="none" stroke="#aac7ff" stroke-width="20" stroke-dasharray="99 352" stroke-dashoffset="-241" stroke-linecap="round" transform="rotate(-90 80 80)" />
+                <text x="80" y="77" text-anchor="middle" class="donut-big">~$0.01</text>
+                <text x="80" y="94" text-anchor="middle" class="donut-small">est. / vote</text>
+              </svg>
+            </div>
+
+            <div class="split-legend">
+              <h3>Batch Submit &amp; Prove Split</h3>
+              <p class="split-subnote">Estimated rate · Paid from sponsored pool</p>
+              <div class="legend-item">
+                <span class="dot dot-tertiary"></span>
+                <span>Prover <small>(proves batch)</small></span>
+                <strong>65%</strong>
+              </div>
+              <div class="legend-item">
+                <span class="dot dot-primary"></span>
+                <span>Aggregator <small>(submits batch)</small></span>
+                <strong>35%</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Sponsored Pool Fee & Refund Simulator -->
+          <div class="split-sim-col">
+            <div class="slider-header">
+              <div>
+                <span class="slider-eyebrow">Example $100 Sponsored Pool (~$0.01 / vote est.)</span>
+                <h3 class="slider-title">Valid Offline Votes Proven</h3>
+              </div>
+              <span class="slider-value-pill" id="simVotesLabel">5,000 / ~10,000 votes</span>
+            </div>
+
+            <input
+              type="range"
+              id="simVotesSlider"
+              class="md-slider"
+              min="0"
+              max="10000"
+              step="500"
+              value="5000"
+              aria-label="Valid votes proven"
+            />
+
+            <div class="payout-bars">
+              <div class="payout-item">
+                <div class="payout-meta">
+                  <span><span class="dot dot-tertiary"></span>Prover <small>(65%)</small></span>
+                  <strong id="simProverAmt">$32.50</strong>
+                </div>
+                <div class="md-progress"><div class="md-progress-fill fill-tertiary" id="simProverBar" style="width: 32.5%"></div></div>
+              </div>
+
+              <div class="payout-item">
+                <div class="payout-meta">
+                  <span><span class="dot dot-primary"></span>Aggregator <small>(35%)</small></span>
+                  <strong id="simAggAmt">$17.50</strong>
+                </div>
+                <div class="md-progress"><div class="md-progress-fill fill-primary" id="simAggBar" style="width: 17.5%"></div></div>
+              </div>
+
+              <div class="payout-item">
+                <div class="payout-meta">
+                  <span><span class="dot dot-neutral"></span>Unused Refund</span>
+                  <strong id="simRefundAmt">$50.00</strong>
+                </div>
+                <div class="md-progress"><div class="md-progress-fill fill-neutral" id="simRefundBar" style="width: 50%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fees-footnote" role="note">
+          <span class="fees-footnote-badge">Market-Aligned</span>
+          <p><strong>$0.01 / vote is estimated.</strong> Fee parameters are constantly updated to reflect market realities.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about" class="md-section">
+      <div class="md-container">
+        <div class="section-head">
+          <span class="section-label">About</span>
+          <h2 class="md-headline">Credible signal without governance capture</h2>
+          <p class="section-sub">
+            Ethereum evolves through rough consensus. Therdal gives ETH holders a verifiable, nonbinding signal—without governance capture.
+          </p>
+        </div>
+
+        <div class="about-grid">
+          <!-- Visual Comparison Matrix -->
+          <div class="md-card md-card-surface compare-card">
+            <h3 class="card-title">Why Therdal exists</h3>
+            <div class="compare-rows">
+              <div class="compare-row compare-head">
+                <span>Approach</span>
+                <span>Bot-Proof</span>
+                <span>Trustless</span>
+                <span>Nonbinding</span>
+              </div>
+
+              <div class="compare-row">
+                <span class="row-name">Social Polls</span>
+                <span class="status-no" aria-label="No">✕</span>
+                <span class="status-no" aria-label="No">✕</span>
+                <span class="status-yes" aria-label="Yes">✓</span>
+              </div>
+
+              <div class="compare-row">
+                <span class="row-name">Centralized Off-Chain Polls</span>
+                <span class="status-yes" aria-label="Yes">✓</span>
+                <span class="status-no" aria-label="No">✕</span>
+                <span class="status-yes" aria-label="Yes">✓</span>
+              </div>
+
+              <div class="compare-row">
+                <span class="row-name">On-Chain DAO Governance</span>
+                <span class="status-yes" aria-label="Yes">✓</span>
+                <span class="status-yes" aria-label="Yes">✓</span>
+                <span class="status-no" aria-label="Binding">✕</span>
+              </div>
+
+              <div class="compare-row row-highlight">
+                <span class="row-name"><strong>Therdal</strong></span>
+                <span class="status-yes" aria-label="Yes">✓</span>
+                <span class="status-yes" aria-label="Yes">✓</span>
+                <span class="status-yes" aria-label="Yes">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual Stake Unification Card -->
+          <div class="md-card md-card-surface coverage-card">
+            <h3 class="card-title">Every ETH position, counted once</h3>
+            <svg viewBox="0 0 480 205" class="coverage-svg" aria-label="Wallet ETH and Staked Validators merge into a single verified tally with zero double counting">
+              <!-- Left Inputs -->
+              <rect x="14" y="22" width="208" height="68" rx="16" fill="#22262f" stroke="#3c4252" />
+              <circle cx="42" cy="56" r="14" fill="#284777" />
+              <text x="42" y="61" text-anchor="middle" fill="#d6e3ff" font-size="13" font-weight="700">Ξ</text>
+              <text x="65" y="51" fill="#e2e2e9" font-size="13" font-weight="600">Wallet ETH</text>
+              <text x="65" y="70" fill="#9aa0ac" font-size="11">Regular &amp; hardware wallets</text>
+
+              <rect x="14" y="114" width="208" height="68" rx="16" fill="#22262f" stroke="#3c4252" />
+              <circle cx="42" cy="148" r="14" fill="#1e4d3b" />
+              <text x="42" y="153" text-anchor="middle" fill="#b6f2d8" font-size="13" font-weight="700">V</text>
+              <text x="65" y="143" fill="#e2e2e9" font-size="13" font-weight="600">Staked Validators</text>
+              <text x="65" y="162" fill="#9aa0ac" font-size="11">Active validator balances</text>
+
+              <!-- Merge Paths -->
+              <path d="M 222 56 C 248 56, 248 102, 272 102" fill="none" stroke="#aac7ff" stroke-width="2" stroke-dasharray="4 4" />
+              <path d="M 222 148 C 248 148, 248 102, 272 102" fill="none" stroke="#7dd8b6" stroke-width="2" stroke-dasharray="4 4" />
+
+              <!-- Unified Output -->
+              <rect x="272" y="46" width="194" height="112" rx="20" fill="#243047" stroke="#aac7ff" stroke-width="1.5" />
+              <text x="369" y="84" text-anchor="middle" fill="#d6e3ff" font-size="11" font-weight="600">CRYPTOGRAPHIC PROOF</text>
+              <text x="369" y="109" text-anchor="middle" fill="#ffffff" font-size="15.5" font-weight="700">Verified ETH Tally</text>
+              <text x="369" y="132" text-anchor="middle" fill="#b8c7e4" font-size="11.5">Each ETH counted once</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLOSING CTA & OPERATOR DOCS BANNERS -->
+    <section class="cta-section">
+      <div class="md-container cta-stack">
+        <!-- Stakeholder Participation CTA -->
+        <div class="md-card cta-banner">
+          <div>
+            <h2 class="cta-title">Ready to participate?</h2>
+            <p class="cta-sub">Create a topic, vote offline for free, or sponsor gas-free voting.</p>
+          </div>
+          <div class="hero-actions">
+            <a href="./frontend/index.html#create" class="md-btn md-btn-tonal md-btn-lg md-ripple">Create a Topic</a>
+            <a href="./frontend/index.html" class="md-btn md-btn-filled md-btn-lg md-ripple">
+              <span>Launch App</span>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 17L17 7M9 7h8v8" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Operator Docs CTA (Aggregator & Prover) -->
+        <div id="docs" class="md-card cta-banner cta-banner-docs">
+          <div>
+            <span class="docs-kicker">Operator Documentation</span>
+            <h2 class="cta-title">Run a Vote Aggregator or Prover</h2>
+            <p class="cta-sub">Learn how to host a voting frontend, submit batches, or prove votes to earn USDC.</p>
+          </div>
+          <div class="hero-actions">
+            <a href="./docs.html#aggregator" class="md-btn md-btn-tonal md-btn-lg md-ripple">Aggregator Guide</a>
+            <a href="./docs.html#prover" class="md-btn md-btn-tonal-tertiary md-btn-lg md-ripple">
+              <span>Prover Guide</span>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="md-footer">
+    <div class="md-container">
+      <!-- Compact One-Liner Donation Strip -->
+      <div id="donate" class="donate-oneliner">
+        <span class="donate-oneliner-text">Support Therdal — please consider donating <strong>ETH</strong> or <strong>USDC</strong> to</span>
+        <code class="donate-addr-code" id="donateAddressText">0x122900f6288b51998371ed90E2A424d63Ea9564E</code>
+        <button
+          type="button"
+          class="donate-copy-btn md-ripple"
+          data-copy-address="0x122900f6288b51998371ed90E2A424d63Ea9564E"
+          aria-label="Copy Ethereum donation address"
+        >
+          Copy
+        </button>
+        <button type="button" class="donate-inline-btn md-ripple" data-open-donate="ETH">
+          Donate
+        </button>
+      </div>
+
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="./assets/logo-mark.svg?v=2" alt="" width="24" height="24" class="footer-logo-mark" />
+          <strong>Therdal</strong>
+          <span>Stakeholder signaling protocol for Ethereum</span>
+        </div>
+        <div class="footer-links">
+          <a href="#protocol">Protocol</a>
+          <a href="#contribute">Contribute</a>
+          <a href="#earn">Earn</a>
+          <a href="#fees">Fees</a>
+          <a href="#about">About</a>
+          <a href="./docs.html">Docs</a>
+          <a href="https://github.com/svylabs/therdal" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="./frontend/index.html">Launch App</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive ETH / USDC Donation Modal -->
+  <div class="donate-modal-backdrop" id="donateModalBackdrop" hidden>
+    <div class="md-card md-card-elevated donate-modal" role="dialog" aria-modal="true" aria-labelledby="donateModalTitle">
+      <div class="donate-modal-head">
+        <div>
+          <span class="donate-kicker">Support Public-Goods Development</span>
+          <h3 id="donateModalTitle">Donate ETH or USDC</h3>
+        </div>
+        <button type="button" class="donate-close-btn" id="closeDonateModalBtn" aria-label="Close donation dialog">✕</button>
+      </div>
+
+      <p class="donate-modal-desc">
+        100% of your contribution supports open-source Therdal development on Ethereum Mainnet.
+      </p>
+
+      <div class="donate-asset-tabs" role="tablist" aria-label="Select donation currency">
+        <button type="button" class="donate-asset-tab active md-ripple" data-donate-asset="ETH" role="tab" aria-selected="true">
+          Donate ETH
+        </button>
+        <button type="button" class="donate-asset-tab md-ripple" data-donate-asset="USDC" role="tab" aria-selected="false">
+          Donate USDC
+        </button>
+      </div>
+
+      <div class="donate-presets" id="donatePresets">
+        <button type="button" class="donate-preset-chip active" data-donate-amount="0.01">0.01 ETH</button>
+        <button type="button" class="donate-preset-chip" data-donate-amount="0.05">0.05 ETH</button>
+        <button type="button" class="donate-preset-chip" data-donate-amount="0.1">0.1 ETH</button>
+        <button type="button" class="donate-preset-chip" data-donate-amount="0.5">0.5 ETH</button>
+      </div>
+
+      <label class="donate-field-label" for="donateAmountInput">Amount (<span id="donateAssetSymbol">ETH</span> on Ethereum Mainnet)</label>
+      <div class="donate-input-wrap">
+        <input
+          type="text"
+          inputmode="decimal"
+          id="donateAmountInput"
+          class="donate-amount-input"
+          value="0.01"
+          autocomplete="off"
+        />
+        <span class="donate-input-unit" id="donateInputUnit">ETH</span>
+      </div>
+
+      <div class="donate-modal-addr-box">
+        <span class="donate-modal-addr-label">Recipient Address (Ethereum Mainnet)</span>
+        <div class="donate-modal-addr-row">
+          <code>0x122900f6288b51998371ed90E2A424d63Ea9564E</code>
+          <button
+            type="button"
+            class="donate-copy-btn md-ripple"
+            data-copy-address="0x122900f6288b51998371ed90E2A424d63Ea9564E"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="donate-modal-actions">
+        <button type="button" class="md-btn md-btn-filled md-btn-lg md-ripple" id="sendWalletDonationBtn">
+          Send via Browser Wallet
+        </button>
+        <a
+          href="ethereum:0x122900f6288b51998371ed90E2A424d63Ea9564E@1?value=10000000000000000"
+          id="donateWalletUriLink"
+          class="md-btn md-btn-tonal md-ripple"
+        >
+          Open in Wallet App
+        </a>
+      </div>
+
+      <p class="donate-status" id="donateStatusMsg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <script src="./src/material-v12.js?v=15"></script>
+</body>
+</html>

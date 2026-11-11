@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="markVL" x1="21" y1="36" x2="32" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#eaf2ff" />
+      <stop offset="100%" stop-color="#aac7ff" />
+    </linearGradient>
+    <linearGradient id="markVR" x1="32" y1="36" x2="43" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#aac7ff" />
+      <stop offset="100%" stop-color="#689cf6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Concentric Upward Wi-Fi Signal Arcs -->
+  <path d="M 10.2 21.5 A 37.0 37.0 0 0 1 53.8 21.5" stroke="#7dd8b6" stroke-width="4.6" stroke-linecap="round" />
+  <path d="M 16.4 29.8 A 26.5 26.5 0 0 1 47.6 29.8" stroke="#aac7ff" stroke-width="4.6" stroke-linecap="round" />
+
+  <!-- Single Half-ETH Faceted V-Chevron Base -->
+  <polygon points="21.4,36.6 32,51.2 32,41.2" fill="url(#markVL)" />
+  <polygon points="42.6,36.6 32,51.2 32,41.2" fill="url(#markVR)" />
+</svg>

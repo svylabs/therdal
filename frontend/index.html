@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Therdal Interactive Protocol App — Create topics and cast verifiable ETH-weighted snapshot votes." />
+  <title>Therdal App — Stage 2: Direct Snapshot Voting &amp; Topic Registry</title>
+  <link rel="canonical" href="https://therdal.org/frontend/" />
+  <meta property="og:site_name" content="Therdal" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://therdal.org/frontend/" />
+  <meta property="og:title" content="Therdal App — Direct Snapshot Voting &amp; Topic Registry" />
+  <meta property="og:description" content="Create topics and cast verifiable ETH-weighted snapshot votes with Execution MPT or Beacon SSZ proofs." />
+  <meta property="og:image" content="https://therdal.org/assets/apple-touch-icon.png" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg?v=2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png?v=2" />
+  <link rel="shortcut icon" href="../assets/favicon.ico?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png?v=2" />
+  <link rel="stylesheet" href="./src/styles.css?v=5" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../assets/favicon.svg?v=2" alt="Therdal" width="42" height="42" class="brand-logo" />
+      <div>
+        <h1>Therdal App <span class="version-pill">Stage 2 · Direct Snapshot Voting</span></h1>
+        <p class="subtitle">The voice of ETH holders · Vote directly with Execution ETH (MPT) or Beacon Staked ETH (SSZ) proofs</p>
+      </div>
+    </div>
+    <div class="wallet-bar">
+      <a href="../index.html" class="btn btn-outline btn-sm">← Protocol Website</a>
+      <a href="../docs.html#direct-voting" class="btn btn-outline btn-sm">Docs</a>
+      <div class="chain-status">
+        <span class="dot"></span>
+        <span id="chainClockBadge">Block #21,500,000</span>
+      </div>
+      <select id="activePersonaSelect" class="persona-select" title="Select Active Wallet">
+        <option value="alice">Wallet: Alice (25 ETH + 96 Staked ETH)</option>
+        <option value="bob">Wallet: Bob (14.5 ETH + 32 Staked ETH)</option>
+        <option value="carol">Wallet: Carol (40 ETH + 128 Staked ETH)</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="invariant-banner">
+      <div>
+        <strong>Stage 2 Protocol Invariants (<code>Therdal.sol</code>):</strong>
+        <span>Direct Voting &amp; Topic Creation are Always Free (<code>$0</code> protocol fee · <code>0</code> SponsorEscrow used)</span> ·
+        <span>Execution ETH via RLP + EIP-1186 MPT (<code>THERDAL_WALLET</code>)</span> ·
+        <span>Beacon Staked ETH via EIP-4788 + Depth-40 SHA-256 SSZ (<code>0x01</code>/<code>0x02</code> · <code>THERDAL_VALIDATOR</code>)</span>
+      </div>
+    </section>
+
+    <div class="grid-layout">
+      <!-- Left Column: Active Wallet Holdings + Create Topic + Chain Clock -->
+      <aside class="sidebar">
+        <div class="card" id="activeHoldingsCard"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Create a Topic</h2>
+            <span class="badge badge-open">Always Free · $0 Fee</span>
+          </div>
+          <p class="muted-text">
+            Register a signaling topic on Ethereum. Automatically pins parent <code>snapshotBlock = block.number - 1</code> and EIP-4788 <code>snapshotBeaconBlockRoot</code>.
+          </p>
+
+          <form id="createTopicForm" class="form-stack" novalidate>
+            <label for="topicSubjectInput">
+              <span class="field-header">
+                <span>1. Subject</span>
+                <span id="subjectByteCounter" class="byte-counter">0 / 512 bytes</span>
+              </span>
+              <textarea
+                id="topicSubjectInput"
+                rows="3"
+                maxlength="512"
+                required
+                placeholder="e.g., Should Ethereum raise the blob target from 6 to 12 in the next upgrade?"
+              ></textarea>
+            </label>
+
+            <div class="field-block">
+              <div class="field-header">
+                <span class="field-label">2. Options (Free-Text Strings · <span id="optionCountBadge">3</span> / 16)</span>
+                <button type="button" id="addOptionBtn" class="btn btn-outline btn-xs">+ Add Option</button>
+              </div>
+              <div id="optionsInputsList" class="options-inputs-list"></div>
+            </div>
+
+            <div class="field-block">
+              <div class="field-header">
+                <label for="votingEndsInput" class="field-label">3. Voting Ends</label>
+                <span id="votingEndsUnixPreview" class="mono-inline">unix: —</span>
+              </div>
+              <div class="preset-chips" id="durationPresets">
+                <button type="button" class="chip-btn" data-hours="24">+24h</button>
+                <button type="button" class="chip-btn active" data-hours="168">+7 days</button>
+                <button type="button" class="chip-btn" data-hours="336">+14 days</button>
+                <button type="button" class="chip-btn" data-hours="720">+30 days</button>
+              </div>
+              <input type="datetime-local" id="votingEndsInput" required />
+            </div>
+
+            <label for="initialSponsorshipInput">
+              <span class="field-header">
+                <span>Optional Initial Sponsorship (USDC)</span>
+                <span class="byte-counter">100% to Pool · $0 Fee</span>
+              </span>
+              <input
+                type="number"
+                id="initialSponsorshipInput"
+                min="0"
+                step="1"
+                value="0"
+              />
+            </label>
+
+            <div class="hash-preview-box">
+              <span class="k">Canonical <code>contentHash</code> (<code>THERDAL_TOPIC_V1</code>):</span>
+              <code id="liveContentHashPreview" class="hash-code">Enter subject, options &amp; deadline…</code>
+            </div>
+
+            <div id="createFormFeedback" class="feedback-banner hidden"></div>
+
+            <button type="submit" id="createSubmitBtn" class="btn btn-primary">
+              Create Topic (Free · $0)
+            </button>
+          </form>
+        </div>
+
+        <!-- Simulated Chain Clock Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Chain Clock Controls</h2>
+            <span class="badge badge-blue">Lifecycle Test</span>
+          </div>
+          <p class="muted-text">
+            Advance simulated Ethereum block time to verify topics transition from <code>Open</code> to <code>Closed</code> once <code>block.timestamp &gt; votingEndsAt</code>.
+          </p>
+          <div class="action-toolbar" style="margin-bottom:0;">
+            <button type="button" id="warp1hBtn" class="btn btn-outline btn-sm">+1 Hour</button>
+            <button type="button" id="warp24hBtn" class="btn btn-outline btn-sm">+24 Hours</button>
+            <button type="button" id="warpPastDeadlineBtn" class="btn btn-outline btn-sm">Jump Past Selected Deadline</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Column: Registered Topics List + Selected Topic Direct Voting + Event Log -->
+      <section class="main-panel">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Registered Topics (<span id="totalTopicsCount">0</span>)</h2>
+            </div>
+            <div class="filter-tabs" id="phaseFilterTabs">
+              <button type="button" class="chip-btn active" data-filter="ALL">All</button>
+              <button type="button" class="chip-btn" data-filter="Open">Open</button>
+              <button type="button" class="chip-btn" data-filter="Closed">Closed</button>
+            </div>
+          </div>
+          <div id="topicsList" class="resolution-list"></div>
+        </div>
+
+        <div id="topicDetailCard" class="card"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>On-Chain Event Log</h2>
+            <span class="mono-pill">ITopicRegistry &amp; IDirectVoting Events</span>
+          </div>
+          <div id="protocolEventLog" class="event-log"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
