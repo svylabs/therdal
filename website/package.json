@@ -1,0 +1,9 @@
+{
+  "name": "@therdal/website",
+  "version": "0.2.0",
+  "description": "Therdal — A Permissionless and Verifiable Stakeholder Signaling Protocol for Ethereum",
+  "scripts": {
+    "start": "python3 -m http.server 4173 --directory .."
+  },
+  "license": "MIT"
+}

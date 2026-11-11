@@ -1,0 +1,21 @@
+[package]
+name = "therdal-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "therdal-cli"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+hex.workspace = true
+k256.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+therdal-archive = { path = "../archive" }
+therdal-circuits = { path = "../circuits" }
+therdal-prover = { path = "../prover" }
+therdal-publisher = { path = "../publisher" }

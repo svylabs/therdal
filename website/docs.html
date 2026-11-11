@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta name="description" content="Therdal Protocol Documentation — Concepts, Operator Guides for Vote Aggregators and Batch Provers, and Technical Specifications." />
+  <title>Therdal Docs — Protocol &amp; Operator Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png?v=2" />
+  <link rel="shortcut icon" href="./assets/favicon.ico?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/material-v11.css?v=12" />
+</head>
+<body class="docs-body">
+  <!-- Material Design 3 Top App Bar -->
+  <header class="md-top-bar">
+    <div class="docs-topbar-inner">
+      <div class="docs-topbar-left">
+        <button type="button" class="docs-menu-btn md-ripple" id="docsMenuBtn" aria-label="Toggle topics sidebar">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <a href="./index.html" class="md-brand">
+          <img src="./assets/favicon.svg?v=2" alt="" width="38" height="38" class="md-brand-logo" />
+          <span class="md-brand-text">Therdal</span>
+          <span class="docs-badge">Docs</span>
+        </a>
+      </div>
+
+      <nav class="md-nav" aria-label="Main navigation">
+        <a href="./index.html#protocol" class="md-nav-link md-ripple">Protocol</a>
+        <a href="./index.html#contribute" class="md-nav-link md-ripple">Contribute</a>
+        <a href="./index.html#earn" class="md-nav-link md-ripple">Earn</a>
+        <a href="./index.html#fees" class="md-nav-link md-ripple">Fees</a>
+        <a href="./index.html#about" class="md-nav-link md-ripple">About</a>
+        <a href="./docs.html" class="md-nav-link active md-ripple">Docs</a>
+      </nav>
+
+      <div class="top-bar-actions">
+        <a href="../frontend/index.html" class="md-btn md-btn-filled md-ripple">
+          <span>Launch App</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17L17 7M9 7h8v8" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- TWO-PANE DOCUMENTATION LAYOUT -->
+  <div class="docs-shell">
+    <!-- LEFT PANEL: STICKY TOPIC NAVIGATION -->
+    <aside class="docs-sidebar" id="docsSidebar" aria-label="Documentation topics">
+      <div class="sidebar-search-wrap">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="search-icon" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-3.5-3.5" />
+        </svg>
+        <input type="search" id="docsSearchInput" class="sidebar-search" placeholder="Filter topics..." aria-label="Filter documentation topics" />
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav">
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Getting Started</div>
+          <a href="#overview" class="sidebar-link active" data-doc-link="overview">Overview</a>
+          <a href="#quickstart" class="sidebar-link" data-doc-link="quickstart">Quickstart &amp; CLI</a>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Core Concepts</div>
+          <a href="#topics" class="sidebar-link" data-doc-link="topics">Topics &amp; Custom Options</a>
+          <a href="#snapshots" class="sidebar-link" data-doc-link="snapshots">Snapshots &amp; ETH Eligibility</a>
+          <a href="#economics" class="sidebar-link" data-doc-link="economics">Sponsored Funds &amp; Fee Split</a>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Operator Guides (Earn)</div>
+          <a href="#aggregator" class="sidebar-link" data-doc-link="aggregator">Run a Vote Aggregator</a>
+          <a href="#prover" class="sidebar-link" data-doc-link="prover">Run a Batch Prover</a>
+        </div>
+
+        <div class="sidebar-group">
+          <div class="sidebar-group-title">Protocol Specification</div>
+          <a href="#blob-format" class="sidebar-link" data-doc-link="blob-format">Batch &amp; Blob Format</a>
+          <a href="#public-inputs" class="sidebar-link" data-doc-link="public-inputs">Proof Public Inputs</a>
+          <a href="#security" class="sidebar-link" data-doc-link="security">Security &amp; Threat Model</a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- RIGHT PANEL: DOCUMENTATION CONTENT -->
+    <main class="docs-content-pane" id="docsContentPane">
+      <div class="docs-article-wrap">
+
+        <!-- 1. OVERVIEW -->
+        <article class="doc-article active" data-doc="overview">
+          <div class="doc-eyebrow">Getting Started</div>
+          <h1>Overview</h1>
+          <p class="doc-lead">
+            <strong>Therdal</strong> is a permissionless and verifiable stakeholder signaling protocol for Ethereum—giving ETH holders a credible way to express nonbinding preferences without claiming formal governance authority.
+          </p>
+
+          <div class="doc-callout callout-info">
+            <strong>Nonbinding by design:</strong> Therdal measures real ETH-weighted sentiment across regular wallets and staked validators without introducing coin-voting capture over Ethereum protocol upgrades.
+          </div>
+
+          <h2>Four Decoupled Protocol Stages</h2>
+          <p>
+            Therdal separates topic creation, voter signing, batch publication, and cryptographic proof settlement so no single actor is trusted and voters can participate offline for $0 gas:
+          </p>
+          <ol>
+            <li><strong>Create a Topic:</strong> Anyone publishes a question, defines custom voting choices, records the Ethereum block-header snapshot at creation, and seeds a refundable USDC vote pool.</li>
+            <li><strong>Cast a Vote:</strong> ETH holders select an option backed by both wallet ETH and validator stake—signing offline for $0 gas or voting directly.</li>
+            <li><strong>Aggregate &amp; Publish:</strong> Permissionless aggregators host voting frontends, collect offline signatures, and post compressed vote batches into Ethereum EIP-4844 blobs.</li>
+            <li><strong>Prove &amp; Settle:</strong> Permissionless provers generate cryptographic validity proofs verifying signatures, snapshot balances, and uniqueness—updating the L1 tally and routing sponsored USDC rewards.</li>
+          </ol>
+
+          <h2>Key Ecosystem Roles</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Access</th>
+                  <th>Responsibility</th>
+                  <th>Economics</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Creator / Sponsor</strong></td>
+                  <td>Permissionless</td>
+                  <td>Creates topic, defines options &amp; optionally funds free-vote pool</td>
+                  <td>Always free ($0 creation fee); optional USDC sponsorship (100% to pool, unused refunded)</td>
+                </tr>
+                <tr>
+                  <td><strong>ETH Voter</strong></td>
+                  <td>ETH Holders</td>
+                  <td>Selects a choice with wallet &amp; validator ETH</td>
+                  <td>$0 gas via offline signing (or direct vote)</td>
+                </tr>
+                <tr>
+                  <td><strong>Vote Aggregator</strong></td>
+                  <td>Permissionless</td>
+                  <td>Hosts voting UI &amp; posts bundled vote batches to blobs</td>
+                  <td>Earns <strong>25%</strong> of per-vote fee from sponsored funds</td>
+                </tr>
+                <tr>
+                  <td><strong>Batch Prover</strong></td>
+                  <td>Permissionless</td>
+                  <td>Proves batch validity &amp; settles tally on Ethereum</td>
+                  <td>Earns <strong>50%</strong> of per-vote fee from sponsored funds</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- 2. QUICKSTART -->
+        <article class="doc-article" data-doc="quickstart">
+          <div class="doc-eyebrow">Getting Started</div>
+          <h1>Quickstart &amp; CLI</h1>
+          <p class="doc-lead">
+            Build the smart contracts, circuits, publisher, and prover locally, and run a complete end-to-end simulation of batch aggregation, out-of-order proving, and USDC fee splitting.
+          </p>
+
+          <h2>Prerequisites</h2>
+          <ul>
+            <li><strong>Rust Toolchain</strong> (<code>cargo</code>, Rust 1.85+ / Edition 2024)</li>
+            <li><strong>Foundry</strong> (<code>forge</code>, <code>cast</code>, <code>anvil</code> for Solidity contracts)</li>
+            <li><strong>Python 3</strong> or any static HTTP server to preview the web app locally</li>
+          </ul>
+
+          <h2>1. Run Smart Contract Tests</h2>
+          <pre class="md-code"><code>forge test -vv</code></pre>
+
+          <h2>2. Run Rust Circuit, Publisher &amp; Prover Tests</h2>
+          <pre class="md-code"><code>cargo test --offline</code></pre>
+
+          <h2>3. Run the End-to-End Protocol Simulation</h2>
+          <p>
+            The <code>demo-e2e</code> command simulates free topic creation, optional USDC pool sponsorship, multi-position offline signing (wallets + validators), permissionless batch aggregation, malformed spam-batch immunity, out-of-order STARK proving, 25/25/50 USDC payouts, and unused sponsor refunds:
+          </p>
+          <pre class="md-code"><code>cargo run --offline --bin therdal-cli -- demo-e2e</code></pre>
+
+          <h2>4. Launch the Website &amp; Interactive App</h2>
+          <pre class="md-code"><code>python3 -m http.server 4173
+# Website:          http://localhost:4173/website/
+# Documentation:    http://localhost:4173/website/docs.html
+# Interactive App:  http://localhost:4173/frontend/</code></pre>
+        </article>
+
+        <!-- 3. TOPICS & CUSTOM OPTIONS -->
+        <article class="doc-article" data-doc="topics">
+          <div class="doc-eyebrow">Core Concepts</div>
+          <h1>Topics &amp; Custom Options</h1>
+          <p class="doc-lead">
+            Topics on Therdal are not restricted to binary Yes/No ballots. Creators define the question and custom voting options when creating the topic.
+          </p>
+
+          <h2>Creating a Topic</h2>
+          <p>
+            When calling <code>createResolution(ResolutionConfig)</code> on <code>Therdal.sol</code>, the creator specifies:
+          </p>
+          <ul>
+            <li><strong>Question &amp; Options Metadata (<code>questionURI</code>):</strong> Content-addressed URI (IPFS / Arweave / canonical JSON) defining the topic title, summary, and indexed option labels (for example, <code>["12 Blobs", "9 Blobs", "Keep at 6 Blobs"]</code> or <code>["60M Gas", "45M Gas", "36M Gas", "No Change"]</code>).</li>
+            <li><strong>Snapshot Reference:</strong> <code>snapshotBlockNumber</code>, <code>snapshotBeaconTimestamp</code>, and <code>snapshotEpoch</code> recording the Ethereum block headers at creation.</li>
+            <li><strong>Lifecycle Windows:</strong> <code>votingStartsAt</code>, <code>votingEndsAt</code>, and <code>settlementDeadline</code>.</li>
+            <li><strong>Payment Stablecoin &amp; Optional Initial Sponsorship:</strong> Approved USD stablecoin (defaulting to USDC) and any optional initial sponsorship (creating a topic requires $0 deposit and $0 protocol fee).</li>
+          </ul>
+
+          <h2>Topic Lifecycle Phases</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Phase</th>
+                  <th>Condition</th>
+                  <th>Permitted Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>Open</code></td>
+                  <td><code>votingStartsAt &lt;= now &lt;= votingEndsAt</code></td>
+                  <td>Voters sign choices; aggregators call <code>publishBatch</code>; anyone calls <code>sponsor</code> or <code>authenticateSnapshot</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>Settling</code></td>
+                  <td><code>votingEndsAt &lt; now &lt;= settlementDeadline</code></td>
+                  <td>Provers call <code>settleBatch</code> in any batch order; sponsors can still top up if pool runs low.</td>
+                </tr>
+                <tr>
+                  <td><code>Finalized</code></td>
+                  <td>All published batches settled</td>
+                  <td>Final tallies locked; contributors call <code>claimRefund</code> for unused pool shares.</td>
+                </tr>
+                <tr>
+                  <td><code>ClosedForRefunds</code></td>
+                  <td><code>now &gt; settlementDeadline</code></td>
+                  <td>Settlement grace window closed; unused sponsored funds unlocked for pro-rata refunds.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- 4. SNAPSHOTS & ETH ELIGIBILITY -->
+        <article class="doc-article" data-doc="snapshots">
+          <div class="doc-eyebrow">Core Concepts</div>
+          <h1>Snapshots &amp; ETH Eligibility</h1>
+          <p class="doc-lead">
+            Therdal measures voting weight from Ethereum block headers recorded at topic creation—counting both execution-layer wallet balances and consensus-layer staked validators without locking anyone's ETH.
+          </p>
+
+          <div class="doc-callout callout-tip">
+            <strong>Moving or buying ETH afterward has no effect:</strong> Because balances are proven against the block headers recorded when the topic was created, transferring, selling, or buying ETH after topic creation neither increases nor decreases a voter's weight, and voters never lock their funds.
+          </div>
+
+          <h2>Two-Step Snapshot Authentication</h2>
+          <ol>
+            <li><strong>Record at Creation:</strong> <code>createResolution</code> records <code>snapshotBlockNumber</code> and <code>snapshotBeaconTimestamp</code> / <code>snapshotEpoch</code> with minimal gas overhead.</li>
+            <li><strong>Authenticate Before Settlement:</strong> Anyone calls <code>authenticateSnapshot(topicId, SnapshotAuthProof)</code> before the first batch settles:
+              <ul>
+                <li><strong>Execution Root:</strong> Verified against <code>blockhash(snapshotBlockNumber)</code> or the EIP-2935 History Storage contract (<code>0x0000F90827F1C53a10cb7A02335B175320002935</code>), extracting <code>stateRoot</code> from the RLP execution header.</li>
+                <li><strong>Beacon Root:</strong> Verified against the EIP-4788 Beacon Roots contract (<code>0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02</code>) with SHA-256 SSZ Merkle branches confirming alignment to the exact same execution block hash.</li>
+              </ul>
+            </li>
+          </ol>
+
+          <h2>Eligible ETH Positions</h2>
+          <ul>
+            <li><strong>Execution Wallet Balances (<code>THERDAL_WALLET</code>):</strong> Proven via an EIP-1186 Merkle-Patricia Trie account proof against <code>snapshotExecutionRoot</code> where <code>account == vote.signer</code>. Weight equals exact snapshot balance in wei.</li>
+            <li><strong>Beacon Validator Stakes (<code>THERDAL_VALIDATOR</code>):</strong> Proven via an SSZ Merkle inclusion branch against <code>snapshotBeaconRoot</code>. Requires <code>slashed == false</code>, <code>activationEpoch &lt;= snapshotEpoch &lt; exitEpoch</code>, and <code>0x01</code> or <code>0x02</code> withdrawal credentials matching <code>vote.signer</code>.</li>
+          </ul>
+
+          <h2>Zero Double-Counting (256-bit Sparse Merkle Tree)</h2>
+          <p>
+            Every counted wallet or validator key is inserted into the topic's on-chain 256-bit Sparse Merkle Tree (<code>positionRoot</code>). If a later vote or batch attempts to claim an already-counted wallet or validator, the prover circuit skips that duplicate position automatically (<code>weight = 0</code> added).
+          </p>
+        </article>
+
+        <!-- 5. SPONSORED FUNDS & FEE SPLIT -->
+        <article class="doc-article" data-doc="economics">
+          <div class="doc-eyebrow">Core Concepts</div>
+          <h1>Sponsored Funds &amp; Fee Split</h1>
+          <p class="doc-lead">
+            Offline voting is free for ETH holders because each topic holds a sponsored USD stablecoin pool that pays aggregators and provers per verified valid vote.
+          </p>
+
+          <h2>Free Topic Creation &amp; Optional Sponsorships</h2>
+          <ul>
+            <li><strong>Always Free Topic Creation ($0 Fee):</strong> Anyone can create a topic or referendum on Ethereum with <code>$0</code> upfront deposit and <code>$0</code> protocol creation fee.</li>
+            <li><strong>Direct Voting:</strong> Always free (<code>$0</code> protocol fee).</li>
+            <li><strong>Optional Sponsorships (100% to Pool):</strong> Anyone (the creator or community sponsors) can optionally deposit USDC at creation or call <code>sponsor(topicId, amount)</code> to fund free offline voting. <strong>100%</strong> goes into <code>SponsorEscrow</code> with <code>$0</code> deposit fee (funding an estimated <code>~10,000</code> valid offline votes per <code>$100</code> sponsored at <code>~$0.01/vote</code>).</li>
+            <li><strong>Market-Updated Fee Parameters (Frozen per Topic):</strong> <code>~$0.01 / vote</code> is an estimate—fee parameters are constantly updated to reflect market realities (gas, blob, and proving costs), while each topic freezes its <code>paymentToken</code> and <code>pricePerVote</code> at creation so active pools are never repriced mid-vote.</li>
+          </ul>
+
+          <h2>Revenue Split per Valid Vote (~$0.01 USDC Est.)</h2>
+          <p>
+            A voter claiming both their wallet and multiple validators in a single signed ballot counts as <strong>1 valid vote</strong> (an estimated <code>~$0.01</code> total fee, regardless of ETH amount). For <code>F = newlyAcceptedVoteCount * pricePerVote</code> (illustrated at <code>$0.01 / vote</code>):
+          </p>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Recipient</th>
+                  <th>Share</th>
+                  <th>1,000 Valid Votes (Est.)</th>
+                  <th>10,000 Valid Votes ($100 Pool Est.)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Batch Prover (<code>msg.sender</code>)</strong></td>
+                  <td><strong>50%</strong></td>
+                  <td>$5.00 USDC</td>
+                  <td>$50.00 USDC</td>
+                </tr>
+                <tr>
+                  <td><strong>Vote Aggregator (<code>batch.submitter</code>)</strong></td>
+                  <td><strong>25%</strong></td>
+                  <td>$2.50 USDC</td>
+                  <td>$25.00 USDC</td>
+                </tr>
+                <tr>
+                  <td><strong>Protocol (<code>TherdalController</code>)</strong></td>
+                  <td><strong>25%</strong></td>
+                  <td>$2.50 USDC</td>
+                  <td>$25.00 USDC</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2>Pro-Rata Unused Refunds</h2>
+          <p>
+            Once all batches settle or <code>settlementDeadline</code> passes, unused sponsored funds <code>U</code> are locked for refunds. Each sponsor claims <strong>100%</strong> of their exact pro-rata unused share via <code>claimRefund(topicId)</code>:
+          </p>
+          <pre class="md-code"><code>refund_i = floor(U * contributorEscrow[i] / totalEscrowContributed)</code></pre>
+        </article>
+
+        <!-- 6. RUN A VOTE AGGREGATOR -->
+        <article class="doc-article" data-doc="aggregator">
+          <div class="doc-eyebrow">Operator Guides · Earn 25%</div>
+          <h1>Run a Vote Aggregator</h1>
+          <p class="doc-lead">
+            Vote Aggregators host frontends where ETH holders sign votes offline, bundle signed votes into Ethereum EIP-4844 blobs, and earn <strong>25%</strong> of the per-vote fee from sponsored funds whenever those votes are proven valid.
+          </p>
+
+          <div class="doc-callout callout-info">
+            <strong>Zero protocol fee at publication:</strong> Calling <code>publishBatch</code> requires no protocol deposit—you only pay standard Ethereum blob gas, and receive USDC payouts automatically when any prover settles your batch.
+          </div>
+
+          <h2>Architecture of an Aggregator</h2>
+          <ol>
+            <li><strong>Offline Voting UI &amp; HTTP Intake:</strong> Serve a web UI using <code>@therdal/sdk</code> that prompts ETH holders to sign an EIP-712 <code>Vote</code> message offline (specifying <code>resolutionId</code>, chosen option index, <code>deadline</code>, and claimed wallet/validator positions).</li>
+            <li><strong>Pre-Queue Validation:</strong> Verify the voter's ECDSA signature and canonical encoding using <code>BatchPublisher::submit_signed_vote</code> so invalid spam never enters your blob payload.</li>
+            <li><strong>Blob Packing &amp; Public Archival:</strong> Encode queued votes into <code>THERDAL_BLOB_V1</code> blobs (up to 6 blobs / ~760 KB per batch) and expose the raw blob files on a public HTTP endpoint or IPFS gateway so permissionless provers can retrieve them even after the 18-day EIP-4844 beacon pruning window.</li>
+            <li><strong>On-Chain Registration:</strong> Submit a Type-3 blob transaction calling <code>Therdal.publishBatch(resolutionId, blobCount)</code> before <code>votingEndsAt</code>.</li>
+          </ol>
+
+          <h2>Step 1: Sign or Collect Offline Vote Envelopes</h2>
+          <pre class="md-code"><code># Example: generate a signed offline vote JSON envelope via CLI
+cargo run --offline --bin therdal-cli -- sign-vote \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+  --resolution-id 1 \
+  --chain-id 1 \
+  --choice 0 \
+  --validator-indices 101 102 \
+  --out ./votes/voter_1.json</code></pre>
+
+          <h2>Step 2: Pack Votes into Canonical EIP-4844 Blobs</h2>
+          <pre class="md-code"><code># Validate signatures, pack canonical 31-byte field elements, and write to archive
+cargo run --offline --bin therdal-cli -- publish-batch \
+  --resolution-id 1 \
+  --batch-id 0 \
+  --archive-dir ./public-blob-archive \
+  --vote-files ./votes/voter_1.json ./votes/voter_2.json</code></pre>
+
+          <h2>Step 3: Submit Type-3 Blob Transaction to Ethereum</h2>
+          <pre class="md-code"><code># Register the blob batch on Therdal.sol (records msg.sender as batch.submitter)
+cast send $THERDAL_ADDRESS "publishBatch(uint256,uint8)" 1 1 \
+  --blob \
+  --path ./public-blob-archive/res_1_batch_0.blob \
+  --rpc-url $ETH_RPC_URL \
+  --private-key $AGGREGATOR_PRIVATE_KEY</code></pre>
+
+          <h2>Embedding the Rust Publisher Library</h2>
+          <pre class="md-code"><code>use therdal_archive::BlobArchive;
+use therdal_publisher::BatchPublisher;
+
+let mut publisher = BatchPublisher::new();
+publisher.submit_signed_vote(signed_vote)?;
+
+let archive = BlobArchive::new("./public-blob-archive")?;
+let prepared = publisher.publish_next_batch(
+    resolution_id,
+    batch_id,
+    aggregator_address,
+    &amp;archive,
+)?;
+println!("Commitment root: 0x{}", hex::encode(prepared.commitment_root));</code></pre>
+        </article>
+
+        <!-- 7. RUN A BATCH PROVER -->
+        <article class="doc-article" data-doc="prover">
+          <div class="doc-eyebrow">Operator Guides · Earn 50%</div>
+          <h1>Run a Batch Prover</h1>
+          <p class="doc-lead">
+            Batch Provers verify published vote blobs off-chain, generate cryptographic validity proofs, and call <code>settleBatch</code> on Ethereum to earn <strong>50%</strong> of the per-vote fee from sponsored funds for every valid vote.
+          </p>
+
+          <div class="doc-callout callout-tip">
+            <strong>Non-sequential batch proving:</strong> You can prove any unsettled <code>batchId</code> in any order. If an aggregator publishes a malformed or unavailable blob, simply skip it—malformed batches never block honest batches and earn $0.
+          </div>
+
+          <h2>Prover Workflow</h2>
+          <ol>
+            <li><strong>Monitor Published Batches:</strong> Subscribe to <code>BatchPublished(resolutionId, batchId, submitter, commitmentRoot, blobVersionedHashes)</code> events on <code>Therdal.sol</code>.</li>
+            <li><strong>Ensure Snapshot Is Authenticated:</strong> Check <code>resolutionState(resolutionId).snapshotAuthenticated</code>. If <code>false</code>, fetch the RLP execution block header and beacon SSZ branch for the topic's snapshot block and call <code>authenticateSnapshot</code> once.</li>
+            <li><strong>Build State &amp; Validator Witnesses:</strong> Decode the raw blob bytes from your beacon node or the aggregator's blob archive. Fetch EIP-1186 account proofs (<code>eth_getProof</code>) at <code>snapshotBlockNumber</code> and beacon validator SSZ proofs at <code>snapshotEpoch</code> for each claimed position.</li>
+            <li><strong>Generate Proof &amp; Settle On-Chain:</strong> Run <code>BatchProver::prove_batch</code> against the current on-chain <code>positionRoot</code> and submit <code>Therdal.settleBatch</code>.</li>
+          </ol>
+
+          <h2>Step 1: Authenticate Topic Snapshot (If Needed)</h2>
+          <pre class="md-code"><code>cast send $THERDAL_ADDRESS \
+  "authenticateSnapshot(uint256,(bytes,bytes32,bytes32,bytes32[],bytes32[],uint256))" \
+  1 "$SNAPSHOT_AUTH_PROOF_TUPLE" \
+  --rpc-url $ETH_RPC_URL \
+  --private-key $PROVER_PRIVATE_KEY</code></pre>
+
+          <h2>Step 2: Generate Batch Validity Proof in Rust</h2>
+          <pre class="md-code"><code>use therdal_archive::BlobArchive;
+use therdal_prover::BatchProver;
+
+let archive = BlobArchive::new("./public-blob-archive")?;
+let mut prover = BatchProver::default();
+
+// Synchronize `prover.smt`, `prover.tallies`, and `prover.counted_positions`
+// with the current on-chain ResolutionState before proving target `batch_id`:
+let settlement = prover.prove_batch(
+    &amp;archive,
+    chain_id,
+    resolution_id,
+    ruleset_version,
+    batch_id,
+    snapshot_epoch,
+    voting_ends_at,
+    snapshot_execution_root,
+    snapshot_beacon_root,
+    &amp;wallet_witnesses,
+    &amp;validator_witnesses,
+    price_per_vote_usdc_micros,
+)?;
+
+println!(
+    "Valid votes proven: {} | Prover reward: ${:.2} USDC",
+    settlement.newly_accepted_vote_count,
+    settlement.prover_share_usdc_micros as f64 / 1_000_000.0
+);</code></pre>
+
+          <h2>Step 3: Submit On-Chain Settlement &amp; Collect 50% Fee Share</h2>
+          <pre class="md-code"><code>cast send $THERDAL_ADDRESS \
+  "settleBatch(uint256,uint256,bytes32,uint256[3],uint256,uint256,bytes)" \
+  $RESOLUTION_ID \
+  $BATCH_ID \
+  $NEW_POSITION_ROOT \
+  "[$TALLY_0,$TALLY_1,$TALLY_2]" \
+  $NEW_COUNTED_POSITIONS \
+  $NEWLY_ACCEPTED_VOTES \
+  $PROOF_BYTES \
+  --rpc-url $ETH_RPC_URL \
+  --private-key $PROVER_PRIVATE_KEY</code></pre>
+        </article>
+
+        <!-- 8. BATCH & BLOB FORMAT -->
+        <article class="doc-article" data-doc="blob-format">
+          <div class="doc-eyebrow">Protocol Specification</div>
+          <h1>Batch &amp; Blob Format</h1>
+          <p class="doc-lead">
+            Canonical <code>THERDAL_BLOB_V1</code> binary framing and KZG-to-STARK commitment binding for EIP-4844 vote batches.
+          </p>
+
+          <h2>Canonical 31-Byte Field Element Packing</h2>
+          <p>
+            Each EIP-4844 blob contains <code>4,096</code> BLS12-381 scalar field elements (<code>131,072</code> bytes). Every 32-byte field element <code>FE[k]</code> MUST set byte <code>0</code> to <code>0x00</code> and carry <code>31</code> payload bytes in bytes <code>1..32</code>, yielding <code>126,976</code> usable payload bytes per blob (maximum <code>6</code> blobs per batch).
+          </p>
+
+          <h2>Stream Binary Layout (<code>THERDAL_BLOB_V1</code>)</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Byte Offset</th>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>0..8</code></td>
+                  <td><code>magic</code></td>
+                  <td><code>[u8; 8]</code></td>
+                  <td>ASCII <code>"THDLBLOB"</code> (<code>0x5448444c424c4f42</code>)</td>
+                </tr>
+                <tr>
+                  <td><code>8..12</code></td>
+                  <td><code>version</code></td>
+                  <td><code>u32</code> (BE)</td>
+                  <td>Format version (<code>1</code>)</td>
+                </tr>
+                <tr>
+                  <td><code>12..44</code></td>
+                  <td><code>resolutionId</code></td>
+                  <td><code>u256</code> (BE)</td>
+                  <td>Target topic / resolution ID</td>
+                </tr>
+                <tr>
+                  <td><code>44..52</code></td>
+                  <td><code>batchId</code></td>
+                  <td><code>u64</code> (BE)</td>
+                  <td>Batch index registered on-chain</td>
+                </tr>
+                <tr>
+                  <td><code>52..56</code></td>
+                  <td><code>voteCount</code></td>
+                  <td><code>u32</code> (BE)</td>
+                  <td>Number of encoded <code>VoteRecord</code> items</td>
+                </tr>
+                <tr>
+                  <td><code>56..60</code></td>
+                  <td><code>payloadLen</code></td>
+                  <td><code>u32</code> (BE)</td>
+                  <td>Byte length of all encoded <code>VoteRecord</code> items</td>
+                </tr>
+                <tr>
+                  <td><code>60..60+len</code></td>
+                  <td><code>records</code></td>
+                  <td><code>VoteRecord[]</code></td>
+                  <td>Length-prefixed canonical signed votes</td>
+                </tr>
+                <tr>
+                  <td><code>60+len..end</code></td>
+                  <td><code>padding</code></td>
+                  <td><code>0x00*</code></td>
+                  <td>Zero-byte trailing padding</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2>KZG-to-STARK Binding</h2>
+          <p>
+            On-chain, <code>BatchRegistry</code> reads <code>blobhash(i)</code> and stores <code>commitmentRoot = keccak256(abi.encodePacked(blobHashes))</code>. Inside <code>circuits/src/blob_binding.rs</code>, the prover verifies that <code>keccak256(concat(versionedHashes)) == commitmentRoot</code> and checks the Fiat-Shamir barycentric polynomial evaluation opening against each blob's <code>0x01</code> KZG commitment.
+          </p>
+        </article>
+
+        <!-- 9. PROOF PUBLIC INPUTS -->
+        <article class="doc-article" data-doc="public-inputs">
+          <div class="doc-eyebrow">Protocol Specification</div>
+          <h1>Proof Public Inputs</h1>
+          <p class="doc-lead">
+            <code>StarkVerifierAdapter.sol</code> and <code>circuits/src/batch_transition.rs</code> bind every settlement proof to a canonical 608-byte (19-word) public input digest.
+          </p>
+
+          <h2><code>BatchPublicInputs</code> Structure</h2>
+          <pre class="md-code"><code>struct BatchPublicInputs {
+    uint256 chainId;
+    uint256 resolutionId;
+    uint32  rulesetVersion;
+    bytes32 snapshotExecutionRoot;
+    bytes32 snapshotBeaconRoot;
+    uint256 batchId;
+    bytes32 registeredBatchCommitment;
+    bytes32 oldPositionRoot;
+    bytes32 newPositionRoot;
+    uint256[3] oldTallies;
+    uint256[3] newTallies;
+    uint256 oldCountedPositions;
+    uint256 newCountedPositions;
+    uint256 newlyAcceptedVoteCount;
+}</code></pre>
+
+          <h2>Per-Vote Counting Rule (<code>newlyAcceptedVoteCount</code>)</h2>
+          <ul>
+            <li>A valid signed <code>Vote</code> envelope that contributes at least one newly counted ETH position (<code>weight &gt; 0</code> not yet present in <code>oldPositionRoot</code>) increments <code>newlyAcceptedVoteCount</code> by <strong>1</strong>.</li>
+            <li>Claiming an execution wallet plus multiple validators in a single signed ballot increases ETH weight and <code>newCountedPositions</code> without multiplying the per-vote fee (<code>~$0.01</code> estimated).</li>
+            <li>Invalid, expired, or 100%-duplicate votes increment <code>newlyAcceptedVoteCount</code> by <strong>0</strong>.</li>
+          </ul>
+        </article>
+
+        <!-- 10. SECURITY & THREAT MODEL -->
+        <article class="doc-article" data-doc="security">
+          <div class="doc-eyebrow">Protocol Specification</div>
+          <h1>Security &amp; Threat Model</h1>
+          <p class="doc-lead">
+            Core cryptographic settlement and escrow solvency invariants enforced on Ethereum L1.
+          </p>
+
+          <h2>Core Safety Invariants</h2>
+          <ol>
+            <li><strong>Cryptographic Settlement Invariant:</strong> Every tally update must verify a valid proof bound to an on-chain <code>commitmentRoot</code>, authenticated <code>snapshotExecutionRoot</code> / <code>snapshotBeaconRoot</code>, and the current 256-bit SMT <code>positionRoot</code>, guaranteeing every ETH position is counted at most once.</li>
+            <li><strong>Escrow Solvency Invariant:</strong> <code>totalEarnedFees + remainingEscrow == totalEscrowContributed</code> prior to refunds, and <code>sum(refund_i) &lt;= frozenUnusedEscrow</code> after settlement closes.</li>
+          </ol>
+
+          <h2>Actor Threat Matrix</h2>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>Actor</th>
+                  <th>Adversarial Vector</th>
+                  <th>Protocol Defense</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Topic Creator</strong></td>
+                  <td>Supplying forged execution or beacon state roots at creation</td>
+                  <td>Roots authenticated via <code>BLOCKHASH</code>/EIP-2935 &amp; EIP-4788; topic creation charges $0 fee and 100% of optional sponsorships enter refundable escrow</td>
+                </tr>
+                <tr>
+                  <td><strong>Spam Submitter</strong></td>
+                  <td>Publishing garbage blobs to stall settlement or drain sponsored funds</td>
+                  <td>Non-sequential settlement bypasses malformed batches; rewards require valid STARK proof (spam earns $0)</td>
+                </tr>
+                <tr>
+                  <td><strong>Censoring Frontend</strong></td>
+                  <td>Dropping signed votes that favor an unwanted choice</td>
+                  <td>Voters can route offline votes to any competing aggregator or submit directly</td>
+                </tr>
+                <tr>
+                  <td><strong>Malicious Prover</strong></td>
+                  <td>Splitting multi-validator votes to inflate per-vote fee payouts</td>
+                  <td>Voter ECDSA signature covers the entire envelope; replay blocked by SMT + <code>batch.settled</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Pricing Controller</strong></td>
+                  <td>Raising per-vote fee retroactively on active topics</td>
+                  <td><code>paymentToken</code> and <code>pricePerVote</code> frozen per topic at creation</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- BOTTOM PREV / NEXT TOPIC CARDS (Populated Dynamically) -->
+        <nav class="doc-pagination" id="docPagination" aria-label="Topic pagination"></nav>
+      </div>
+    </main>
+  </div>
+
+  <script src="./src/docs-v10.js?v=10"></script>
+</body>
+</html>

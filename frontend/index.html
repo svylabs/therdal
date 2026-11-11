@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Therdal App — A Permissionless and Verifiable Stakeholder Signaling Protocol for Ethereum</title>
+  <link rel="icon" type="image/svg+xml" href="../website/assets/favicon.svg?v=2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../website/assets/favicon-32x32.png?v=2" />
+  <link rel="shortcut icon" href="../website/assets/favicon.ico?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../website/assets/apple-touch-icon.png?v=2" />
+  <link rel="stylesheet" href="./src/styles.css?v=3" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../website/assets/favicon.svg?v=2" alt="Therdal" width="42" height="42" style="display:block;flex-shrink:0;" />
+      <div>
+        <h1>Therdal App <span class="version-pill">v0.2 Spec</span></h1>
+        <p class="subtitle">The voice of ETH holders · Permissionless &amp; Verifiable Stakeholder Signaling for Ethereum</p>
+      </div>
+    </div>
+    <div class="wallet-bar">
+      <a href="../website/index.html" class="btn btn-outline btn-sm">← Protocol Website</a>
+      <div class="chain-status">
+        <span class="dot"></span>
+        <span id="controllerStatusBadge">Controller: 0xTherdalSmartAcct (Operator: 1-Signer → DAO Ready)</span>
+      </div>
+      <select id="activePersonaSelect" class="persona-select" title="Select Active Actor / Wallet">
+        <option value="alice">Voter: Alice (120 ETH Wallet + Validator #101 [32 ETH])</option>
+        <option value="bob">Voter: Bob (85 ETH Wallet + Validator #202 [64 ETH 0x02])</option>
+        <option value="carol">Voter: Carol (40 ETH Wallet)</option>
+        <option value="submitterA">Submitter A: Frontend Aggregator #1 (Permissionless)</option>
+        <option value="submitterB">Submitter B: Frontend Aggregator #2 (Permissionless)</option>
+        <option value="prover">Prover: 0x0000...CAFE (Permissionless STARK Prover)</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="invariant-banner">
+      <div>
+        <strong>v0.2 Economics &amp; Non-Sequential Settlement:</strong>
+        <span>$100 USDC Creation Deposit ($10 Dev Fee + $90 Escrow = 9,000 votes @ $0.01/vote)</span> ·
+        <span>25% Protocol Dev (`TherdalController`) / 25% Blob Submitter / 50% STARK Prover</span> ·
+        <span>Any unsettled valid batch settles out-of-order; malformed batches earn $0</span>
+      </div>
+    </section>
+
+    <div class="grid-layout">
+      <!-- Left Column -->
+      <aside class="sidebar">
+        <div class="card">
+          <div class="card-header">
+            <h2>Public Resolutions</h2>
+            <button id="toggleCreateBtn" class="btn btn-primary btn-sm">+ Create ($100)</button>
+          </div>
+          <div id="resolutionList" class="resolution-list"></div>
+        </div>
+
+        <!-- Create Resolution Form ($100 Deposit) -->
+        <div id="createResolutionCard" class="card hidden">
+          <h2>Create Resolution ($100 Deposit)</h2>
+          <p class="muted-text">$10 nonrefundable creation fee to <code>TherdalController</code> + $90 refundable settlement escrow.</p>
+          <form id="createResolutionForm" class="form-stack">
+            <label>
+              <span>Question / Resolution Statement</span>
+              <input type="text" id="resQuestionInput" required placeholder="e.g., Should Ethereum increase blob throughput?" />
+            </label>
+            <div class="row-2">
+              <label>
+                <span>Pinned Snapshot Block</span>
+                <input type="number" id="resSnapshotBlockInput" value="21000100" required />
+              </label>
+              <label>
+                <span>Beacon Snapshot Epoch</span>
+                <input type="number" id="resSnapshotEpochInput" value="320005" required />
+              </label>
+            </div>
+            <div class="row-2">
+              <label>
+                <span>Payment Stablecoin</span>
+                <input type="text" id="resTokenInput" value="USDC (6 decimals)" readonly />
+              </label>
+              <label>
+                <span>Extra Sponsorship ($ USDC)</span>
+                <input type="number" step="1" min="0" id="resExtraSponsorInput" value="0" required />
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Pay $100 USDC &amp; Create Resolution</button>
+          </form>
+        </div>
+
+        <!-- Controller Smart Account & 25/25/50 Revenue Ledger -->
+        <div class="card">
+          <div class="card-header">
+            <h2>25 / 25 / 50 USDC Fee Ledger</h2>
+            <button id="handoffDaoBtn" class="btn btn-outline btn-sm">Transfer Controller → DAO</button>
+          </div>
+          <p class="muted-text"><code>TherdalController</code> smart account receives the $10 creation fee + 25% of settled vote fees.</p>
+          <div id="actorRewardsBoard" class="ledger-list"></div>
+        </div>
+      </aside>
+
+      <!-- Main Column -->
+      <section class="main-panel">
+        <div id="resolutionDetailCard" class="card"></div>
+
+        <div class="split-2">
+          <!-- Off-Chain EIP-712 Vote Signing & Permissionless Blob Publication -->
+          <div class="card">
+            <div class="card-header">
+              <h2>1. Vote &amp; Permissionless Publication</h2>
+              <span class="badge badge-blue">No Publisher Lock-in</span>
+            </div>
+            <p class="muted-text">Multiple validator claims in one signed vote increase ETH weight without multiplying the $0.01 per-vote fee.</p>
+
+            <form id="signVoteForm" class="form-stack">
+              <div class="choice-group">
+                <label class="choice-pill">
+                  <input type="radio" name="voteChoice" value="0" checked />
+                  <span>YES (0)</span>
+                </label>
+                <label class="choice-pill">
+                  <input type="radio" name="voteChoice" value="1" />
+                  <span>NO (1)</span>
+                </label>
+                <label class="choice-pill">
+                  <input type="radio" name="voteChoice" value="2" />
+                  <span>ABSTAIN (2)</span>
+                </label>
+              </div>
+
+              <div class="positions-box">
+                <span class="label-title">Claimed ETH Positions (1 Vote Fee = $0.01 USDC total):</span>
+                <div id="voterPositionsPreview" class="positions-list"></div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Sign EIP-712 Vote &amp; Add to Submitter Buffer</button>
+            </form>
+
+            <div class="sub-box">
+              <div class="card-header">
+                <h3>Submitter Buffer (<span id="pendingVoteCount">0</span> votes)</h3>
+                <div style="display:flex; gap:0.4rem;">
+                  <button id="publishSpamBtn" class="btn btn-outline btn-sm" title="Simulate malformed spam batch">+ Spam Blob</button>
+                  <button id="publishBatchBtn" class="btn btn-accent btn-sm">Publish EIP-4844 Batch</button>
+                </div>
+              </div>
+              <div id="pendingVotesList" class="compact-list"></div>
+            </div>
+          </div>
+
+          <!-- Non-Sequential Settlement & Pro-Rata Pull Refunds -->
+          <div class="card">
+            <div class="card-header">
+              <h2>2. Non-Sequential Settlement &amp; Refunds</h2>
+              <span class="badge badge-purple">Out-of-Order OK</span>
+            </div>
+            <p class="muted-text">Settle any valid batch in any order during <code>Settling</code>. Malformed batches are ignored and earn $0.</p>
+
+            <div class="action-toolbar">
+              <button id="addSponsorBtn" class="btn btn-outline btn-sm">+ Sponsor $60 USDC</button>
+              <button id="authSnapshotBtn" class="btn btn-outline btn-sm">Authenticate Snapshot</button>
+              <button id="closeVotingBtn" class="btn btn-outline btn-sm">Cutoff → Settling</button>
+              <button id="closeSettlementBtn" class="btn btn-success btn-sm">Close Grace Period &amp; Enable Refunds</button>
+            </div>
+
+            <div class="sub-box">
+              <h3>Registered Batches (Click Any Valid Batch to Prove &amp; Settle)</h3>
+              <div id="batchRegistryList" class="batch-list"></div>
+            </div>
+
+            <div class="sub-box">
+              <h3>Pro-Rata Pull Refunds: <code>floor(U * c_i / C)</code></h3>
+              <div id="refundBoard" class="compact-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SMT & Audit Log -->
+        <div class="card">
+          <div class="card-header">
+            <h2>3. 256-bit Sparse Merkle Tree (SMT) &amp; Protocol Event Log</h2>
+            <span id="smtRootBadge" class="mono-pill">positionRoot: 0x0000...0000</span>
+          </div>
+          <div class="split-2">
+            <div>
+              <h3>Counted ETH Positions</h3>
+              <div id="smtPositionsList" class="compact-list"></div>
+            </div>
+            <div>
+              <h3>Event &amp; Fee Split Log</h3>
+              <div id="protocolEventLog" class="event-log"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

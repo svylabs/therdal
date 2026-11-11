@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1d3156" />
+      <stop offset="100%" stop-color="#0f1624" />
+    </linearGradient>
+    <linearGradient id="vLeft" x1="22" y1="37" x2="32" y2="51" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#eaf2ff" />
+      <stop offset="100%" stop-color="#aac7ff" />
+    </linearGradient>
+    <linearGradient id="vRight" x1="32" y1="37" x2="42" y2="51" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#aac7ff" />
+      <stop offset="100%" stop-color="#689cf6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Tonal Squircle App Container -->
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#bgGrad)" stroke="#355286" stroke-width="1.5" />
+
+  <!-- Concentric Upward Wi-Fi Signal Arcs (aligned to ±36° cone from 32, 50.5) -->
+  <path d="M 12.0 23.0 A 34.0 34.0 0 0 1 52.0 23.0" stroke="#7dd8b6" stroke-width="4.4" stroke-linecap="round" />
+  <path d="M 17.6 30.7 A 24.5 24.5 0 0 1 46.4 30.7" stroke="#aac7ff" stroke-width="4.4" stroke-linecap="round" />
+
+  <!-- Single Half-ETH Faceted V-Chevron Base -->
+  <polygon points="22.3,37.15 32,50.5 32,41.2" fill="url(#vLeft)" />
+  <polygon points="41.7,37.15 32,50.5 32,41.2" fill="url(#vRight)" />
+</svg>
