@@ -2,17 +2,15 @@
 
 ## 1. Snapshot Lifecycle: Pin at Creation, Authenticate Before Settlement
 
-Per architectural decision A2, resolution creation is lightweight and gas-efficient:
-1. **Creation (`createResolution`)**:
-   - The creator specifies:
-     - `snapshotBlockNumber` (`uint64`, must be `< block.number`)
-     - `snapshotBeaconTimestamp` (`uint64`, timestamp of the child block carrying the EIP-4788 parent beacon block root, or `0` if validator voting is disabled)
-     - `snapshotEpoch` (`uint64`, consensus epoch corresponding to the beacon snapshot)
-   - At creation time, `snapshotAuthenticated` is `false` (unless authenticated inline).
-2. **Authentication (`authenticateSnapshot`)**:
-   - Anyone can call `authenticateSnapshot(uint256 resolutionId, SnapshotAuthProof calldata proof)` at any time after creation and prior to settling the first batch (`nextBatchToSettle == 0`).
-   - Once authenticated, `snapshotExecutionRoot` and `snapshotBeaconRoot` are permanently pinned in `ResolutionState`.
-   - `settleBatch` requires `snapshotAuthenticated == true` and binds both roots into the STARK proof public inputs.
+Per architectural decision A2, topic creation automatically pins the parent Ethereum block with minimal gas overhead:
+1. **Creation (`createTopic` / `createTopicWithConfig`)**:
+   - When a topic is registered on `Therdal.sol`, the contract automatically records:
+     - `snapshotBlock = uint64(block.number - 1)`
+     - `snapshotBlockHash = blockhash(block.number - 1)`
+   - Because `blockhash(block.number - 1)` is always available in the EVM during execution, the canonical parent block hash is pinned immediately at creation with zero creator-supplied trust assumptions.
+2. **Authentication Before Settlement (Upcoming Settlement Stage)**:
+   - Prior to settling batches, anyone supplies the RLP execution header matching `snapshotBlockHash` (or EIP-2935 fallback) and the aligned EIP-4788 beacon state root proof.
+   - Once authenticated, `snapshotExecutionRoot` and `snapshotBeaconRoot` bind directly into the STARK proof public inputs.
 
 ---
 

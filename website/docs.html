@@ -177,17 +177,25 @@
             <li><strong>Python 3</strong> or any static HTTP server to preview the web app locally</li>
           </ul>
 
-          <h2>1. Run Smart Contract Tests</h2>
+          <h2>1. Run Smart Contract Tests (Foundry)</h2>
           <pre class="md-code"><code>forge test -vv</code></pre>
 
-          <h2>2. Run Rust Circuit, Publisher &amp; Prover Tests</h2>
-          <pre class="md-code"><code>cargo test --offline</code></pre>
+          <h2>2. Run Rust Topic Domain, CLI &amp; TypeScript SDK Tests</h2>
+          <pre class="md-code"><code>cargo test --offline
+cd sdk &amp;&amp; npm test</code></pre>
 
-          <h2>3. Run the End-to-End Protocol Simulation</h2>
+          <h2>3. Register &amp; Inspect a Topic via CLI (Stage 1)</h2>
           <p>
-            The <code>demo-e2e</code> command simulates free topic creation, optional USDC pool sponsorship, multi-position offline signing (wallets + validators), permissionless batch aggregation, malformed spam-batch immunity, out-of-order STARK proving, 25/25/50 USDC payouts, and unused sponsor refunds:
+            The <code>therdal-cli</code> registers free-text subjects, custom voting options (2–16 unique choices), and voting end timestamps, computing the exact cross-layer <code>THERDAL_TOPIC_V1</code> commitment hash:
           </p>
-          <pre class="md-code"><code>cargo run --offline --bin therdal-cli -- demo-e2e</code></pre>
+          <pre class="md-code"><code>cargo run --offline --bin therdal-cli -- create-topic \
+  --subject "Should Ethereum increase the blob target from 6 to 12?" \
+  --option "12 Blobs" \
+  --option "9 Blobs" \
+  --option "Keep at 6 Blobs" \
+  --voting-ends-at 1900000000
+
+cargo run --offline --bin therdal-cli -- list-topics</code></pre>
 
           <h2>4. Launch the Website &amp; Interactive App</h2>
           <pre class="md-code"><code>python3 -m http.server 4173
@@ -201,18 +209,19 @@
           <div class="doc-eyebrow">Core Concepts</div>
           <h1>Topics &amp; Custom Options</h1>
           <p class="doc-lead">
-            Topics on Therdal are not restricted to binary Yes/No ballots. Creators define the question and custom voting options when creating the topic.
+            Topics on Therdal are not restricted to binary Yes/No ballots. Creators register the subject, custom free-text voting options, and voting end timestamp directly on-chain.
           </p>
 
-          <h2>Creating a Topic</h2>
+          <h2>Creating a Topic (<code>Therdal.sol</code>)</h2>
           <p>
-            When calling <code>createResolution(ResolutionConfig)</code> on <code>Therdal.sol</code>, the creator specifies:
+            When calling <code>createTopic(subject, options, votingEndsAt, initialSponsorship)</code> (or <code>createTopicWithConfig(CreateTopicParams)</code>) on <code>Therdal.sol</code>, the protocol registers and validates:
           </p>
           <ul>
-            <li><strong>Question &amp; Options Metadata (<code>questionURI</code>):</strong> Content-addressed URI (IPFS / Arweave / canonical JSON) defining the topic title, summary, and indexed option labels (for example, <code>["12 Blobs", "9 Blobs", "Keep at 6 Blobs"]</code> or <code>["60M Gas", "45M Gas", "36M Gas", "No Change"]</code>).</li>
-            <li><strong>Snapshot Reference:</strong> <code>snapshotBlockNumber</code>, <code>snapshotBeaconTimestamp</code>, and <code>snapshotEpoch</code> recording the Ethereum block headers at creation.</li>
-            <li><strong>Lifecycle Windows:</strong> <code>votingStartsAt</code>, <code>votingEndsAt</code>, and <code>settlementDeadline</code>.</li>
-            <li><strong>Payment Stablecoin &amp; Optional Initial Sponsorship:</strong> Approved USD stablecoin (defaulting to USDC) and any optional initial sponsorship (creating a topic requires $0 deposit and $0 protocol fee).</li>
+            <li><strong>Subject (<code>string subject</code>):</strong> Required, non-whitespace-only free-text prompt up to <code>512</code> UTF-8 bytes.</li>
+            <li><strong>Custom Options (<code>string[] options</code>):</strong> Between <code>2</code> and <code>16</code> unique, non-whitespace-only free-text option strings (up to <code>256</code> UTF-8 bytes each, deduplicated after ASCII whitespace trimming)—for example, <code>["12 Blobs", "9 Blobs", "Keep at 6 Blobs"]</code> or <code>["60M Gas", "45M Gas", "36M Gas", "No Change"]</code>.</li>
+            <li><strong>Voting Ends (<code>uint64 votingEndsAt</code>):</strong> Future Unix timestamp (<code>votingEndsAt &gt; block.timestamp</code>) defining when voting closes.</li>
+            <li><strong>Automatic Parent Block Snapshot:</strong> Automatically pins <code>snapshotBlock = block.number - 1</code> and <code>snapshotBlockHash = blockhash(block.number - 1)</code> at creation, plus deterministic <code>contentHash</code> (<code>THERDAL_TOPIC_V1</code>).</li>
+            <li><strong>Free Creation &amp; Optional Sponsorship:</strong> Creating a topic requires <code>$0</code> deposit and <code>$0</code> protocol fee. Any optional <code>initialSponsorship</code> (or top-up via <code>sponsorTopic(topicId, amount)</code>) deposits <code>100%</code> into <code>SponsorEscrow</code>.</li>
           </ul>
 
           <h2>Topic Lifecycle Phases</h2>
@@ -228,13 +237,13 @@
               <tbody>
                 <tr>
                   <td><code>Open</code></td>
-                  <td><code>votingStartsAt &lt;= now &lt;= votingEndsAt</code></td>
-                  <td>Voters sign choices; aggregators call <code>publishBatch</code>; anyone calls <code>sponsor</code> or <code>authenticateSnapshot</code>.</td>
+                  <td><code>now &lt;= votingEndsAt</code></td>
+                  <td>Topic is active for signaling; anyone can call <code>sponsorTopic(topicId, amount)</code> to add USDC to the pool.</td>
                 </tr>
                 <tr>
-                  <td><code>Settling</code></td>
-                  <td><code>votingEndsAt &lt; now &lt;= settlementDeadline</code></td>
-                  <td>Provers call <code>settleBatch</code> in any batch order; sponsors can still top up if pool runs low.</td>
+                  <td><code>Closed</code> / <code>Settling</code></td>
+                  <td><code>now &gt; votingEndsAt</code></td>
+                  <td>Voting window has ended; new sponsorships are closed and tally settlement proceeds in later protocol stages.</td>
                 </tr>
                 <tr>
                   <td><code>Finalized</code></td>
@@ -265,7 +274,7 @@
 
           <h2>Two-Step Snapshot Authentication</h2>
           <ol>
-            <li><strong>Record at Creation:</strong> <code>createResolution</code> records <code>snapshotBlockNumber</code> and <code>snapshotBeaconTimestamp</code> / <code>snapshotEpoch</code> with minimal gas overhead.</li>
+            <li><strong>Record at Creation:</strong> <code>createTopic</code> automatically records <code>snapshotBlock = block.number - 1</code> and <code>snapshotBlockHash = blockhash(block.number - 1)</code> on-chain with minimal gas overhead.</li>
             <li><strong>Authenticate Before Settlement:</strong> Anyone calls <code>authenticateSnapshot(topicId, SnapshotAuthProof)</code> before the first batch settles:
               <ul>
                 <li><strong>Execution Root:</strong> Verified against <code>blockhash(snapshotBlockNumber)</code> or the EIP-2935 History Storage contract (<code>0x0000F90827F1C53a10cb7A02335B175320002935</code>), extracting <code>stateRoot</code> from the RLP execution header.</li>
@@ -298,7 +307,7 @@
           <ul>
             <li><strong>Always Free Topic Creation ($0 Fee):</strong> Anyone can create a topic or referendum on Ethereum with <code>$0</code> upfront deposit and <code>$0</code> protocol creation fee.</li>
             <li><strong>Direct Voting:</strong> Always free (<code>$0</code> protocol fee).</li>
-            <li><strong>Optional Sponsorships (100% to Pool):</strong> Anyone (the creator or community sponsors) can optionally deposit USDC at creation or call <code>sponsor(topicId, amount)</code> to fund free offline voting. <strong>100%</strong> goes into <code>SponsorEscrow</code> with <code>$0</code> deposit fee (funding an estimated <code>~10,000</code> valid offline votes per <code>$100</code> sponsored at <code>~$0.01/vote</code>).</li>
+            <li><strong>Optional Sponsorships (100% to Pool):</strong> Anyone (the creator via <code>initialSponsorship</code> or community sponsors via <code>sponsorTopic(topicId, amount)</code>) can optionally deposit USDC while voting is <code>Open</code> to fund free offline voting. <strong>100%</strong> goes into <code>SponsorEscrow</code> with <code>$0</code> deposit fee (funding an estimated <code>~10,000</code> valid offline votes per <code>$100</code> sponsored at <code>~$0.01/vote</code>).</li>
             <li><strong>Market-Updated Fee Parameters (Frozen per Topic):</strong> <code>~$0.01 / vote</code> is an estimate—fee parameters are constantly updated to reflect market realities (gas, blob, and proving costs), while each topic freezes its <code>paymentToken</code> and <code>pricePerVote</code> at creation so active pools are never repriced mid-vote.</li>
           </ul>
 

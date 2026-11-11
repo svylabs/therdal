@@ -19,11 +19,12 @@ This document records the concrete protocol choices resolving the 10 open questi
 - During `publishBatch(resolutionId, blobCount)`, `BatchRegistry` reads each `blobhash(i)` (`i in [0, blobCount)`) from the current transaction and records `commitmentRoot = keccak256(abi.encodePacked(blobHashes))` alongside `submitter = msg.sender`.
 - Inside the STARK transition (`circuits/src/blob_binding.rs`), the prover verifies that `keccak256(concat(blobVersionedHashes)) == registeredBatchCommitment` and checks each blob's canonical 31-byte field element packing and Fiat-Shamir barycentric evaluation equivalence opening against its `0x01` KZG versioned hash.
 
-## 3. On-Chain Execution & Beacon Snapshot Authentication
+## 3. On-Chain Topic Registration & Snapshot Pinning
+- **On-Chain Subject, Custom Options & Deadline (Stage 1)**:
+  - `createTopic(subject, options, votingEndsAt, initialSponsorship)` (and `createTopicWithConfig(CreateTopicParams)`) registers `subject` (`<= 512` UTF-8 bytes), `2..=16` unique non-empty free-text `options` (`<= 256` UTF-8 bytes each), and `votingEndsAt > block.timestamp`, computing deterministic `contentHash` (`THERDAL_TOPIC_V1`).
 - **Pin at Creation, Authenticate Before Settlement**:
-  - `createResolution` pins `snapshotBlockNumber` and `snapshotBeaconTimestamp` / `snapshotEpoch`.
-  - Anyone calls `authenticateSnapshot(resolutionId, SnapshotAuthProof)` prior to settling batches.
-  - `SnapshotAuthenticator` verifies `canonicalBlockHash` via `blockhash` or EIP-2935 (`0x0000F90827F1C53a10cb7A02335B175320002935`), extracts `snapshotExecutionRoot`, and (when validator stake voting is enabled) verifies `snapshotBeaconRoot` via EIP-4788 (`0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02`) + SHA-256 SSZ Merkle branches.
+  - `createTopic` automatically pins `snapshotBlock = uint64(block.number - 1)` and `snapshotBlockHash = blockhash(block.number - 1)` directly on-chain at creation.
+  - Prior to settling batches in later protocol stages, execution and beacon state roots are authenticated against the pinned snapshot block via `BLOCKHASH`/EIP-2935 (`0x0000F90827F1C53a10cb7A02335B175320002935`) and EIP-4788 (`0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02`).
 
 ## 4. Eligible ETH Balances & Validator Control Rules
 - **Execution Balances (`THERDAL_WALLET`)**: Proven against `snapshotExecutionRoot`; weight equals RLP-decoded `balance` in wei.

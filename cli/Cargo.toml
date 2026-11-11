@@ -12,10 +12,6 @@ path = "src/main.rs"
 anyhow.workspace = true
 clap.workspace = true
 hex.workspace = true
-k256.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-therdal-archive = { path = "../archive" }
-therdal-circuits = { path = "../circuits" }
-therdal-prover = { path = "../prover" }
-therdal-publisher = { path = "../publisher" }
+therdal-topics = { path = "../topics" }

@@ -1,13 +1,12 @@
 [package]
-name = "therdal-prover"
+name = "therdal-topics"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [dependencies]
-anyhow.workspace = true
 hex.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-therdal-archive = { path = "../archive" }
-therdal-circuits = { path = "../circuits" }
+sha3.workspace = true
+thiserror.workspace = true

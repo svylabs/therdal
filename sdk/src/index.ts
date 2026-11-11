@@ -1,155 +1,228 @@
 /**
- * Therdal Protocol v0.2 TypeScript SDK
- * - Permissionless EIP-4844 blob publication & non-sequential STARK batch settlement
- * - Smart-account controller (`TherdalController`) & USDC/multi-stablecoin pricing
- * - Mandatory $100 creation deposit ($10 nonrefundable dev fee + $90 escrow)
- * - 25% Developer / 25% Submitter / 50% Prover fee split on `newlyAcceptedVoteCount`
- * - Pro-rata pull refunds: `floor(U * c_i / C)`
+ * Therdal Protocol — Stage 1 (Topic Creation) TypeScript SDK
+ * - Free topic creation ($0 fee, $0 mandatory deposit) with optional 100%-to-pool USDC sponsorship
+ * - Pure input validation matching `TopicValidation.sol` and `therdal-topics` byte-for-byte
+ * - Deterministic cross-layer `contentHash` (`THERDAL_TOPIC_V1`)
  */
 
-export type Choice = 0 | 1 | 2; // 0 = Yes, 1 = No, 2 = Abstain
+import { bytesToHex, keccak256Bytes } from "./keccak256.ts";
 
-export enum PositionType {
-  Wallet = 0,
-  Validator = 1,
-}
+export { bytesToHex, keccak256Bytes };
 
-export interface PositionClaim {
-  positionType: PositionType;
-  id: string;
-}
+export const MIN_TOPIC_OPTIONS = 2;
+export const MAX_TOPIC_OPTIONS = 16;
+export const MAX_SUBJECT_BYTES = 512;
+export const MAX_OPTION_BYTES = 256;
+export const TOPIC_DOMAIN_TAG = "THERDAL_TOPIC_V1";
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as const;
 
-export interface VoteEnvelope {
-  resolutionId: bigint;
-  chainId: bigint;
-  choice: Choice;
-  signer: string;
-  nonceOrVoteId: string;
-  deadline: bigint;
-  positionClaims: PositionClaim[];
-  signature?: string;
-}
-
-export interface ResolutionConfigInput {
-  questionURI: string;
-  snapshotBlockNumber: bigint;
-  snapshotBeaconTimestamp: bigint;
-  snapshotEpoch: bigint;
-  votingStartsAt: bigint;
-  votingEndsAt: bigint;
-  settlementDeadline: bigint;
-  rulesetVersion: number;
-  paymentToken: string; // address(0) defaults to USDC via TherdalController
-  extraSponsorAmount: bigint;
-}
-
-export const THERDAL_EIP712_DOMAIN = (chainId: number | bigint) => ({
-  name: "Therdal",
-  version: "1",
-  chainId: BigInt(chainId),
-});
-
-export const THERDAL_EIP712_VOTE_TYPES = {
-  Vote: [
-    { name: "resolutionId", type: "uint256" },
-    { name: "chainId", type: "uint256" },
-    { name: "choice", type: "uint8" },
-    { name: "signer", type: "address" },
-    { name: "nonceOrVoteId", type: "bytes32" },
-    { name: "deadline", type: "uint64" },
-    { name: "positionClaimsHash", type: "bytes32" },
-  ],
+export const TopicPhase = {
+  None: 0,
+  Open: 1,
+  Closed: 2,
 } as const;
+export type TopicPhaseValue = (typeof TopicPhase)[keyof typeof TopicPhase];
 
-export function createWalletClaim(address: string): PositionClaim {
-  const clean = address.toLowerCase().replace(/^0x/, "").padStart(64, "0");
-  return {
-    positionType: PositionType.Wallet,
-    id: `0x${clean}`,
-  };
+export interface CreateTopicInput {
+  subject: string;
+  options: string[];
+  votingEndsAt: bigint | number;
+  paymentToken?: string;
+  initialSponsorship?: bigint;
 }
 
-export function createValidatorClaim(validatorIndex: number | bigint): PositionClaim {
-  const hex = BigInt(validatorIndex).toString(16).padStart(64, "0");
-  return {
-    positionType: PositionType.Validator,
-    id: `0x${hex}`,
-  };
+export interface TopicView {
+  id: bigint;
+  creator: string;
+  subject: string;
+  options: string[];
+  createdAt: bigint;
+  votingEndsAt: bigint;
+  snapshotBlock: bigint;
+  snapshotBlockHash: `0x${string}`;
+  contentHash: `0x${string}`;
+  paymentToken: string;
+  pricePerVote: bigint;
+  totalSponsored: bigint;
+  remainingEscrow: bigint;
+  phase: TopicPhaseValue;
 }
 
-export function canonicalizePositionClaims(claims: PositionClaim[]): PositionClaim[] {
-  const sorted = [...claims].sort((a, b) => {
-    if (a.positionType !== b.positionType) {
-      return a.positionType - b.positionType;
-    }
-    return a.id.toLowerCase().localeCompare(b.id.toLowerCase());
-  });
+export type TopicValidationErrorCode =
+  | "EmptySubject"
+  | "SubjectTooLong"
+  | "InvalidOptionCount"
+  | "EmptyOption"
+  | "OptionTooLong"
+  | "DuplicateOption"
+  | "InvalidVotingEndTime"
+  | "NegativeSponsorship";
 
-  for (let i = 1; i < sorted.length; i++) {
-    if (
-      sorted[i].positionType === sorted[i - 1].positionType &&
-      sorted[i].id.toLowerCase() === sorted[i - 1].id.toLowerCase()
-    ) {
-      throw new Error(`Duplicate position claim: ${sorted[i].positionType}:${sorted[i].id}`);
-    }
+export class TopicValidationError extends Error {
+  readonly code: TopicValidationErrorCode;
+
+  constructor(code: TopicValidationErrorCode, message: string) {
+    super(message);
+    this.name = "TopicValidationError";
+    this.code = code;
   }
-  return sorted;
+}
+
+const utf8Encoder = new TextEncoder();
+
+function isAsciiWhitespace(byte: number): boolean {
+  return byte === 0x20 || byte === 0x09 || byte === 0x0a || byte === 0x0d;
+}
+
+function trimAsciiBytes(raw: Uint8Array): Uint8Array {
+  let start = 0;
+  let end = raw.length;
+  while (start < end && isAsciiWhitespace(raw[start])) {
+    start++;
+  }
+  while (end > start && isAsciiWhitespace(raw[end - 1])) {
+    end--;
+  }
+  return raw.subarray(start, end);
+}
+
+function encodeUint64Be(value: bigint): Uint8Array {
+  const out = new Uint8Array(8);
+  let rem = value;
+  for (let i = 7; i >= 0; i--) {
+    out[i] = Number(rem & 0xffn);
+    rem >>= 8n;
+  }
+  return out;
+}
+
+export function validateSubject(subject: string): void {
+  const raw = utf8Encoder.encode(subject);
+  if (raw.length === 0) {
+    throw new TopicValidationError("EmptySubject", "Subject must not be empty.");
+  }
+  if (raw.length > MAX_SUBJECT_BYTES) {
+    throw new TopicValidationError(
+      "SubjectTooLong",
+      `Subject length (${raw.length} bytes) exceeds maximum (${MAX_SUBJECT_BYTES} bytes).`
+    );
+  }
+  if (trimAsciiBytes(raw).length === 0) {
+    throw new TopicValidationError("EmptySubject", "Subject must not be whitespace-only.");
+  }
+}
+
+export function validateOptions(options: readonly string[]): void {
+  if (options.length < MIN_TOPIC_OPTIONS || options.length > MAX_TOPIC_OPTIONS) {
+    throw new TopicValidationError(
+      "InvalidOptionCount",
+      `Option count (${options.length}) must be between ${MIN_TOPIC_OPTIONS} and ${MAX_TOPIC_OPTIONS}.`
+    );
+  }
+
+  const seenTrimmedHashes = new Map<string, number>();
+
+  for (let i = 0; i < options.length; i++) {
+    const raw = utf8Encoder.encode(options[i]);
+    if (raw.length === 0) {
+      throw new TopicValidationError("EmptyOption", `Option at index ${i} must not be empty.`);
+    }
+    if (raw.length > MAX_OPTION_BYTES) {
+      throw new TopicValidationError(
+        "OptionTooLong",
+        `Option at index ${i} length (${raw.length} bytes) exceeds maximum (${MAX_OPTION_BYTES} bytes).`
+      );
+    }
+
+    const trimmed = trimAsciiBytes(raw);
+    if (trimmed.length === 0) {
+      throw new TopicValidationError(
+        "EmptyOption",
+        `Option at index ${i} must not be whitespace-only.`
+      );
+    }
+
+    const trimmedHex = bytesToHex(keccak256Bytes(trimmed));
+    const prevIdx = seenTrimmedHashes.get(trimmedHex);
+    if (prevIdx !== undefined) {
+      throw new TopicValidationError(
+        "DuplicateOption",
+        `Duplicate option at index ${i} matches option at index ${prevIdx}.`
+      );
+    }
+    seenTrimmedHashes.set(trimmedHex, i);
+  }
+}
+
+export function validateCreateTopicInput(
+  input: CreateTopicInput,
+  currentTimestampSec: bigint | number
+): void {
+  validateSubject(input.subject);
+  validateOptions(input.options);
+
+  const endsAt = BigInt(input.votingEndsAt);
+  const now = BigInt(currentTimestampSec);
+  if (endsAt <= now) {
+    throw new TopicValidationError(
+      "InvalidVotingEndTime",
+      `votingEndsAt (${endsAt}) must be strictly greater than current timestamp (${now}).`
+    );
+  }
+
+  if (input.initialSponsorship !== undefined && input.initialSponsorship < 0n) {
+    throw new TopicValidationError(
+      "NegativeSponsorship",
+      "initialSponsorship cannot be negative."
+    );
+  }
 }
 
 /**
- * Computes the v0.2 25% Developer / 25% Submitter / 50% Prover fee split for `newlyAcceptedVoteCount`.
- * Throws if `totalFee > remainingEscrow` (Section 9.4 solvency invariant).
+ * Computes the canonical 32-byte cross-layer `contentHash` matching `TopicValidation.sol` and `therdal-topics`:
+ * `keccak256("THERDAL_TOPIC_V1" || keccak256(subject) || uint64(options.length) || keccak256(optionHashes) || uint64(votingEndsAt))`
  */
-export function calculateV02SettlementSplit(
-  newlyAcceptedVoteCount: bigint,
-  pricePerVoteUnits: bigint,
-  remainingEscrowUnits: bigint
-): {
-  totalFee: bigint;
-  developerShare: bigint;
-  submitterShare: bigint;
-  proverShare: bigint;
-  remainingAfter: bigint;
-} {
-  const totalFee = newlyAcceptedVoteCount * pricePerVoteUnits;
-  if (totalFee > remainingEscrowUnits) {
-    throw new Error(`InsufficientEscrowBalance: required ${totalFee}, available ${remainingEscrowUnits}`);
+export function computeTopicContentHash(
+  subject: string,
+  options: readonly string[],
+  votingEndsAt: bigint | number
+): `0x${string}` {
+  const domainBytes = utf8Encoder.encode(TOPIC_DOMAIN_TAG); // 16 bytes
+  const subjectHash = keccak256Bytes(utf8Encoder.encode(subject)); // 32 bytes
+
+  const packedOptHashes = new Uint8Array(options.length * 32);
+  for (let i = 0; i < options.length; i++) {
+    packedOptHashes.set(keccak256Bytes(utf8Encoder.encode(options[i])), i * 32);
   }
-  const developerShare = totalFee / 4n;
-  const submitterShare = totalFee / 4n;
-  const proverShare = totalFee - developerShare - submitterShare;
-  return {
-    totalFee,
-    developerShare,
-    submitterShare,
-    proverShare,
-    remainingAfter: remainingEscrowUnits - totalFee,
-  };
+  const optionsHash = keccak256Bytes(packedOptHashes); // 32 bytes
+
+  const preimage = new Uint8Array(96);
+  preimage.set(domainBytes, 0);
+  preimage.set(subjectHash, 16);
+  preimage.set(encodeUint64Be(BigInt(options.length)), 48);
+  preimage.set(optionsHash, 56);
+  preimage.set(encodeUint64Be(BigInt(votingEndsAt)), 88);
+
+  return bytesToHex(keccak256Bytes(preimage));
 }
 
-/**
- * Computes pro-rata pull refund `floor(U * c_i / C)` (Section 9.3).
- */
-export function calculateProRataRefund(
-  frozenUnusedEscrow: bigint,
-  contributorEscrow: bigint,
-  totalEscrowContributed: bigint
-): bigint {
-  if (frozenUnusedEscrow <= 0n || contributorEscrow <= 0n || totalEscrowContributed <= 0n) {
-    return 0n;
-  }
-  return (frozenUnusedEscrow * contributorEscrow) / totalEscrowContributed;
+export function formatUsdcMicros(micros: bigint): string {
+  const whole = micros / 1_000_000n;
+  const frac = ((micros % 1_000_000n) / 10_000n).toString().padStart(2, "0");
+  return `$${whole}.${frac} USDC`;
 }
 
-export const THERDAL_V02_ABI = [
-  "function createResolution((string questionURI, uint64 snapshotBlockNumber, uint64 snapshotBeaconTimestamp, uint64 snapshotEpoch, uint64 votingStartsAt, uint64 votingEndsAt, uint64 settlementDeadline, uint32 rulesetVersion, address paymentToken, uint256 extraSponsorAmount) config) external returns (uint256 resolutionId)",
-  "function authenticateSnapshot(uint256 resolutionId, (bytes rlpExecutionHeader, bytes32 beaconBlockRoot, bytes32 beaconStateRoot, bytes32[] stateRootBranch, bytes32[] executionHashBranch, uint256 executionHashLeafIndex) proof) external",
-  "function publishBatch(uint256 resolutionId, uint8 blobCount) external returns (uint256 batchId)",
-  "function settleBatch(uint256 resolutionId, uint256 batchId, bytes32 newPositionRoot, uint256[3] newTallies, uint256 newCountedPositions, uint256 newlyAcceptedVoteCount, bytes proof) external",
-  "function finalizeResolution(uint256 resolutionId) external",
-  "function sponsor(uint256 resolutionId, uint256 amount) external",
-  "function closeSettlementAndEnableRefunds(uint256 resolutionId) external",
-  "function claimRefund(uint256 resolutionId) external returns (uint256 refundAmount)",
+export const THERDAL_STAGE1_ABI = [
+  "function createTopic(string subject, string[] options, uint64 votingEndsAt, uint256 initialSponsorship) external returns (uint256 topicId)",
+  "function createTopicWithConfig((string subject, string[] options, uint64 votingEndsAt, address paymentToken, uint256 initialSponsorship) params) external returns (uint256 topicId)",
+  "function sponsorTopic(uint256 topicId, uint256 amount) external",
+  "function topicCount() external view returns (uint256)",
+  "function getTopic(uint256 topicId) external view returns ((uint256 id, address creator, string subject, string[] options, uint64 createdAt, uint64 votingEndsAt, uint64 snapshotBlock, bytes32 snapshotBlockHash, bytes32 contentHash, address paymentToken, uint256 pricePerVote, uint256 totalSponsored, uint256 remainingEscrow, uint8 phase))",
+  "function getTopicOptions(uint256 topicId) external view returns (string[])",
+  "function getTopics(uint256 offset, uint256 limit) external view returns ((uint256 id, address creator, string subject, string[] options, uint64 createdAt, uint64 votingEndsAt, uint64 snapshotBlock, bytes32 snapshotBlockHash, bytes32 contentHash, address paymentToken, uint256 pricePerVote, uint256 totalSponsored, uint256 remainingEscrow, uint8 phase)[])",
+  "function getPhase(uint256 topicId) external view returns (uint8)",
+  "event TopicCreated(uint256 indexed topicId, address indexed creator, address indexed paymentToken, string subject, string[] options, uint64 createdAt, uint64 votingEndsAt, uint64 snapshotBlock, bytes32 snapshotBlockHash, bytes32 contentHash, uint256 frozenPricePerVote, uint256 initialSponsorship)",
+  "event TopicSponsored(uint256 indexed topicId, address indexed sponsor, address indexed paymentToken, uint256 amount, uint256 totalSponsored, uint256 remainingEscrow)",
 ] as const;
 
 export const THERDAL_CONTROLLER_ABI = [
@@ -157,6 +230,7 @@ export const THERDAL_CONTROLLER_ABI = [
   "function developerRecipient() external view returns (address)",
   "function defaultPaymentToken() external view returns (address)",
   "function pricePerVoteUsdMicros() external view returns (uint256)",
+  "function quoteTopicTerms(address requestedToken) external view returns (address paymentToken, uint256 pricePerVote)",
   "function transferOperator(address newOperator) external",
   "function setPricePerVoteUsdMicros(uint256 newPriceUsdMicros) external",
   "function configureStablecoin(address token, uint8 tokenDecimals, bool allowed) external",

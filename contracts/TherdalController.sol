@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "./interfaces/IERC20Minimal.sol";
+import {SafeERC20Helper} from "./interfaces/IERC20Minimal.sol";
 
 /**
  * @title TherdalController
- * @notice Smart-account controller and pricing authority for the Therdal Protocol (v0.2).
- *         - Initially operated by one signer (`operator`), replaceable with a DAO / Timelock via `transferOperator`.
- *         - Acts as the initial Protocol Developer recipient (`developerRecipient = address(this)`), receiving
- *           the $10 nonrefundable creation fee and 25% of earned settlement fees.
- *         - Sets `pricePerVoteUsdMicros` (default $0.01 = 10,000 micro-USD, i.e., $10 per 1,000 votes),
- *           creation deposit/fee parameters, and the allowlist of accepted USD stablecoins (USDC initially).
+ * @notice Smart-account controller and pricing authority for the Therdal Protocol.
+ *         - Initially operated by a single signer (`operator`), transferable to a DAO / Timelock via `transferOperator`.
+ *         - Acts as the initial Protocol Developer recipient (`developerRecipient = address(this)`).
+ *         - Topic creation is always free ($0 creation fee, $0 required deposit).
+ *         - Maintains market-updated `pricePerVoteUsdMicros` (default $0.01 = 10,000 micro-USD) and
+ *           the allowlist of accepted USD stablecoins (USDC initially), frozen per topic at creation.
  */
 contract TherdalController {
     using SafeERC20Helper for address;
@@ -25,28 +25,21 @@ contract TherdalController {
     /// @notice Current smart-account operator (initially 1 signer; transferable to a DAO Timelock)
     address public operator;
 
-    /// @notice Recipient of the $10 creation fee and 25% developer settlement share (initially `address(this)`)
+    /// @notice Recipient of protocol developer settlement shares (initially `address(this)`)
     address public developerRecipient;
 
-    /// @notice Default USD stablecoin (initially USDC)
+    /// @notice Default USD stablecoin used when `paymentToken == address(0)` (initially USDC)
     address public defaultPaymentToken;
 
-    /// @notice Price per newly accepted valid vote in 6-decimal micro-USD (10,000 = $0.01 = $10 / 1,000 votes)
+    /// @notice Estimated price per newly accepted valid vote in 6-decimal micro-USD (10,000 = $0.01)
     uint256 public pricePerVoteUsdMicros;
 
-    /// @notice Mandatory creation deposit in 6-decimal micro-USD (100,000,000 = $100.00)
-    uint256 public creationDepositUsdMicros;
-
-    /// @notice Nonrefundable creation fee in 6-decimal micro-USD (10,000,000 = $10.00; remainder goes to escrow)
-    uint256 public creationFeeUsdMicros;
-
-    /// @notice Allowlist of accepted USD stablecoins and their decimals
+    /// @notice Allowlist of accepted USD stablecoins and their decimals (`6 <= decimals <= 18`)
     mapping(address => StablecoinConfig) public stablecoins;
 
     event OperatorTransferred(address indexed previousOperator, address indexed newOperator);
     event DeveloperRecipientUpdated(address indexed previousRecipient, address indexed newRecipient);
     event PricePerVoteUpdated(uint256 oldPriceUsdMicros, uint256 newPriceUsdMicros);
-    event CreationDepositTermsUpdated(uint256 depositUsdMicros, uint256 creationFeeUsdMicros);
     event StablecoinConfigured(address indexed token, uint8 decimals, bool allowed);
     event DefaultPaymentTokenUpdated(address indexed token);
     event SmartAccountExecuted(address indexed target, uint256 value, bytes data);
@@ -56,21 +49,25 @@ contract TherdalController {
     error ZeroAddress();
     error InvalidDecimals(uint8 decimals);
     error UnsupportedPaymentToken(address token);
-    error InvalidCreationFeeTerms(uint256 depositUsdMicros, uint256 feeUsdMicros);
+    error CannotDisableDefaultToken(address token);
     error InvalidPricePerVote();
     error ExecutionFailed(bytes returnData);
 
     modifier onlyOperator() {
+        _onlyOperator();
+        _;
+    }
+
+    function _onlyOperator() internal view {
         if (msg.sender != operator) {
             revert UnauthorizedOperator(msg.sender);
         }
-        _;
     }
 
     /**
      * @param _initialOperator Single signer initially controlling this smart account
      * @param _usdcToken Initial default USD stablecoin (USDC, typically 6 decimals)
-     * @param _usdcDecimals Decimals of `_usdcToken` (must be between 6 and 18)
+     * @param _usdcDecimals Decimals of `_usdcToken` (`6 <= _usdcDecimals <= 18`)
      */
     constructor(
         address _initialOperator,
@@ -85,13 +82,11 @@ contract TherdalController {
         }
 
         operator = _initialOperator;
-        developerRecipient = address(this); // Controller smart account is the initial developer fee recipient
+        developerRecipient = address(this);
         defaultPaymentToken = _usdcToken;
 
-        // Initial v0.2 pricing: $0.01/vote ($10 per 1,000 votes), $100 deposit ($10 dev fee + $90 escrow)
+        // Default market estimate: $0.01 / valid vote (10,000 micro-USD); $0 creation fee
         pricePerVoteUsdMicros = 10_000;
-        creationDepositUsdMicros = 100_000_000;
-        creationFeeUsdMicros = 10_000_000;
 
         stablecoins[_usdcToken] = StablecoinConfig({allowed: true, decimals: _usdcDecimals});
 
@@ -115,7 +110,7 @@ contract TherdalController {
     }
 
     /**
-     * @notice Updates the protocol developer fee recipient address if governance chooses to separate treasury.
+     * @notice Updates the protocol developer fee recipient address.
      */
     function setDeveloperRecipient(address newRecipient) external onlyOperator {
         if (newRecipient == address(0)) revert ZeroAddress();
@@ -125,7 +120,7 @@ contract TherdalController {
     }
 
     /**
-     * @notice Updates the settlement price per newly accepted valid vote (only applies to newly created resolutions).
+     * @notice Updates the per-vote settlement price for future topics (active topics retain their frozen price).
      */
     function setPricePerVoteUsdMicros(uint256 newPriceUsdMicros) external onlyOperator {
         if (newPriceUsdMicros == 0) revert InvalidPricePerVote();
@@ -135,19 +130,7 @@ contract TherdalController {
     }
 
     /**
-     * @notice Updates the creation deposit and nonrefundable creation fee (in 6-decimal micro-USD).
-     */
-    function setCreationDepositTerms(uint256 depositUsdMicros, uint256 feeUsdMicros) external onlyOperator {
-        if (feeUsdMicros > depositUsdMicros || depositUsdMicros == 0) {
-            revert InvalidCreationFeeTerms(depositUsdMicros, feeUsdMicros);
-        }
-        creationDepositUsdMicros = depositUsdMicros;
-        creationFeeUsdMicros = feeUsdMicros;
-        emit CreationDepositTermsUpdated(depositUsdMicros, feeUsdMicros);
-    }
-
-    /**
-     * @notice Enables or disables a USD stablecoin (e.g., USDT, PYUSD, DAI, USDS) for future resolutions.
+     * @notice Enables or disables an allowlisted USD stablecoin (e.g., USDC, USDT, PYUSD, DAI, USDS).
      */
     function configureStablecoin(
         address token,
@@ -158,12 +141,15 @@ contract TherdalController {
         if (tokenDecimals < 6 || tokenDecimals > 18) {
             revert InvalidDecimals(tokenDecimals);
         }
+        if (!allowed && token == defaultPaymentToken) {
+            revert CannotDisableDefaultToken(token);
+        }
         stablecoins[token] = StablecoinConfig({allowed: allowed, decimals: tokenDecimals});
         emit StablecoinConfigured(token, tokenDecimals, allowed);
     }
 
     /**
-     * @notice Updates the default USD stablecoin used when `config.paymentToken == address(0)`.
+     * @notice Updates the default USD stablecoin used when `paymentToken == address(0)`.
      */
     function setDefaultPaymentToken(address token) external onlyOperator {
         if (!stablecoins[token].allowed) {
@@ -174,7 +160,7 @@ contract TherdalController {
     }
 
     /**
-     * @notice Withdraws earned ERC-20 creation/settlement fees from this controller smart account.
+     * @notice Withdraws ERC-20 tokens held by this controller smart account.
      */
     function withdrawToken(
         address token,
@@ -223,24 +209,17 @@ contract TherdalController {
     }
 
     // -------------------------------------------------------------------------
-    // Pricing Quote View for Therdal.createResolution
+    // Pricing Quote View for Topic Creation ($0 Creation Fee)
     // -------------------------------------------------------------------------
 
     /**
-     * @notice Returns the frozen token-denominated creation deposit, creation fee, initial escrow,
-     *         price per accepted vote, and developer recipient for a new resolution.
+     * @notice Returns the resolved `paymentToken` and frozen token-denominated `pricePerVote`
+     *         for a new topic (`$0` creation fee).
      */
-    function quoteResolutionTerms(address requestedToken)
+    function quoteTopicTerms(address requestedToken)
         external
         view
-        returns (
-            address paymentToken,
-            uint256 creationDeposit,
-            uint256 creationFee,
-            uint256 initialEscrow,
-            uint256 pricePerVote,
-            address devRecipient
-        )
+        returns (address paymentToken, uint256 pricePerVote)
     {
         paymentToken = requestedToken == address(0) ? defaultPaymentToken : requestedToken;
         StablecoinConfig memory cfg = stablecoins[paymentToken];
@@ -249,11 +228,7 @@ contract TherdalController {
         }
 
         uint256 scale = 10 ** uint256(cfg.decimals - 6);
-        creationDeposit = creationDepositUsdMicros * scale;
-        creationFee = creationFeeUsdMicros * scale;
-        initialEscrow = creationDeposit - creationFee;
         pricePerVote = pricePerVoteUsdMicros * scale;
-        devRecipient = developerRecipient;
     }
 
     receive() external payable {}

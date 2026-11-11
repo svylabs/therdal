@@ -6,37 +6,29 @@
 
 **The voice of ETH holders.**
 
-- **Permissionless**: Anyone can create referendums, sponsor participation, submit votes, or generate proofs.
+- **Permissionless**: Anyone can create topics, sponsor participation, submit votes, or generate proofs.
 - **Verifiable**: Voting eligibility, uniqueness, and results can be cryptographically verified.
 - **Stakeholder signaling**: ETH holders express nonbinding preferences without claiming formal governance authority.
 - **For Ethereum**: A focused identity with a clearly defined ecosystem.
 
-Built on Ethereum with **permissionless EIP-4844 blob publication**, **non-sequential off-chain STARK batch proving**, **smart-account pricing & treasury governance (`TherdalController.sol`)**, and **25% / 25% / 50% USD stablecoin (USDC) fee splitting** with pro-rata pull refunds.
-
 ---
 
-## Core v0.2 Architecture & Economics
+## Staged Protocol Implementation
 
-1. **Smart-Account Governance & Pricing (`TherdalController.sol`)**:
-   - Initially operated by a single signer (`operator`), upgradable to a DAO / Timelock (`transferOperator` or `replaceController`).
-   - Acts as the initial **Protocol Developer** fee recipient and manages allowlisted USD stablecoins (**USDC** 6 decimals initially, extensible to 18-decimal `DAI`/`USDS`, `USDT`, `PYUSD`).
-   - Estimated settlement price: **`~$0.01 USDC` per newly accepted valid vote** (`~$10` per `1,000` votes). Fee parameters are constantly updated to reflect market realities, while frozen per resolution at creation so later price updates never retroactively reprice prepaid escrow.
+Therdal is being implemented in modular stages.
 
-2. **Free Topic Creation (`$0` Fee) & Optional Sponsorship Escrow**:
-   - Anyone can create a topic / referendum for free (`$0` upfront deposit and `$0` protocol creation fee). Direct voting is also always free (`$0` protocol fee).
-   - Optional sponsorships (by the creator or community via `sponsor(resolutionId, amount)`) contribute `100%` directly to settlement escrow (`$0` deposit fee, funding `~10,000` estimated valid offline votes per `$100` sponsored).
+### Stage 1: Topic Creation (`Complete`)
 
-3. **Permissionless Publication & Non-Sequential STARK Settlement**:
-   - Anyone can publish EIP-4844 blobs via `publishBatch(resolutionId, blobCount)` during the `Open` window (`$0` paid upfront).
-   - During `Settling`, any prover can prove and settle **any** registered, unsettled batch (`0 <= batchId < nextBatchId`) in **any order**. Malformed or spam batches never block honest batches and earn `$0`.
-   - Each batch proof authenticates `newlyAcceptedVoteCount` (a voter claiming multiple validators in one signed vote counts as **1 accepted vote**, increasing ETH weight without multiplying the per-vote fee).
-   - Each earned settlement fee `F = newlyAcceptedVoteCount * pricePerVote` is split:
-     - **25%** Protocol Developer (`TherdalController`)
-     - **25%** Blob Submitter / Frontend Operator (`batch.submitter`)
-     - **50%** Successful STARK Prover (`msg.sender`)
-
-4. **Settlement Grace Period & Pro-Rata Pull Refunds**:
-   - Once all batches settle (`finalizeResolution`) or `settlementDeadline` expires (`closeSettlementAndEnableRefunds`), unused escrow `U` is frozen and contributors claim `100%` of their unused share `floor(U * c_i / C)` via `claimRefund`.
+Creating a topic registers on Ethereum (`contracts/Therdal.sol` + `contracts/libraries/TopicValidation.sol`):
+1. **Subject (`string subject`)**: Non-empty free-text question (`1..=512` UTF-8 bytes).
+2. **Options (`string[] options`)**: `2` to `16` unique free-text option strings (`1..=256` UTF-8 bytes each, deduplicated after ASCII whitespace trimming).
+3. **Voting Ends (`uint64 votingEndsAt`)**: Future Unix timestamp (`votingEndsAt > block.timestamp`) when voting closes (`Open` while `block.timestamp <= votingEndsAt`, `Closed` afterward).
+4. **Always Free Creation & Optional USDC Sponsorship**:
+   - Creating a topic requires **`$0` protocol fee** and **`$0` mandatory deposit** (`initialSponsorship = 0`).
+   - Creators or community sponsors can optionally fund a topic's `SponsorEscrow` pool (`initialSponsorship > 0` or `sponsorTopic(topicId, amount)`), with **100%** entering escrow and `TherdalController.sol` freezing `paymentToken` and `pricePerVote` (`~$0.01 / vote` default estimate) per topic.
+5. **Automatic Parent Block Snapshot & Cross-Layer Commitment**:
+   - Pins `snapshotBlock = block.number - 1` and `snapshotBlockHash = blockhash(block.number - 1)` automatically at creation.
+   - Computes deterministic 32-byte `contentHash` (`THERDAL_TOPIC_V1`) verified identically across Solidity, Rust (`therdal-topics`), TypeScript (`@therdal/sdk`), and the browser frontend (`frontend/`).
 
 ---
 
@@ -47,19 +39,32 @@ Built on Ethereum with **permissionless EIP-4844 blob publication**, **non-seque
 forge test -vv
 ```
 
-### 2. Run Rust Prover & Circuit Tests
+### 2. Run Rust Domain & CLI Tests
 ```bash
 cargo test --offline
 ```
 
-### 3. Run the v0.2 End-to-End CLI Simulation
+### 3. Run TypeScript SDK Tests
 ```bash
-cargo run --offline --bin therdal-cli -- demo-e2e
+cd sdk && npm test
 ```
 
-### 4. Launch the Website & Interactive Protocol App
+### 4. Register & Inspect a Topic via CLI
+```bash
+cargo run --offline --bin therdal-cli -- create-topic \
+  --subject "Should Ethereum increase the blob target from 6 to 12?" \
+  --option "12 Blobs" \
+  --option "9 Blobs" \
+  --option "Keep at 6 Blobs" \
+  --voting-ends-at 1900000000
+
+cargo run --offline --bin therdal-cli -- list-topics
+```
+
+### 5. Launch the Website & Interactive Stage 1 App
 ```bash
 python3 -m http.server 4173
 # Public Protocol Website: http://localhost:4173/website/  (or http://localhost:4173/)
-# Interactive Protocol App: http://localhost:4173/frontend/
+# Documentation Portal:    http://localhost:4173/website/docs.html
+# Interactive Stage 1 App: http://localhost:4173/frontend/
 ```

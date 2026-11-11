@@ -13,10 +13,10 @@
 
 ## 2. Free Topic Creation ($0 Fee) & Optional Sponsorship Escrow
 
-1. **Always Free Creation (`$0` Deposit & `$0` Fee)**: Anyone can call `createResolution(config)` to create a topic / referendum for free (`0 USDC` upfront deposit required and `$0` protocol creation fee). Direct on-chain voting also carries `$0` protocol fee.
-2. **Optional Sponsorships (`100%` to Pool)**: Anyone (the creator at creation or community sponsors via `sponsor(resolutionId, amount)`) can optionally deposit USD stablecoins to fund gas-free offline voting. **100%** of sponsored funds enter `remainingEscrow[resolutionId]` and `contributorEscrow[resolutionId][sponsor]` with zero creation or deposit fee.
+1. **Always Free Creation (`$0` Deposit & `$0` Fee)**: Anyone can call `createTopic(subject, options, votingEndsAt, initialSponsorship)` (with `initialSponsorship = 0`) to register a topic / referendum for free (`0 USDC` upfront deposit required and `$0` protocol creation fee). Direct on-chain voting also carries `$0` protocol fee.
+2. **Optional Sponsorships (`100%` to Pool)**: Anyone (the creator via `initialSponsorship` or community sponsors via `sponsorTopic(topicId, amount)`) can optionally deposit USD stablecoins while the topic is `Open` to fund gas-free offline voting. **100%** of sponsored funds enter `remainingEscrow[topicId]` and `sponsorContributions[topicId][sponsor]` with zero creation or deposit fee.
    - At an estimated `~$0.01` (`10_000` USDC units) per newly accepted valid vote (`~$10` per `1,000` votes), an optional `$100` (`100_000_000` USDC units) sponsorship funds **~10,000 accepted votes**.
-3. **Frozen Resolution Pricing**: While `TherdalController` constantly updates fee parameters for new topics to reflect market realities, each resolution freezes `paymentToken` and `pricePerVote` at creation so future controller price changes never retroactively reprice an active topic's escrow.
+3. **Frozen Topic Pricing**: While `TherdalController` constantly updates fee parameters (`pricePerVoteUsdMicros`) for new topics to reflect market realities, each topic freezes `paymentToken` and `pricePerVote` at creation so future controller price changes never retroactively reprice an active topic's escrow.
 
 ---
 

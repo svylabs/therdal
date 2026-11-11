@@ -1,8 +1,11 @@
 {
   "name": "@therdal/sdk",
   "version": "0.1.0",
-  "description": "TypeScript SDK for Therdal Protocol v0.1 — EIP-712 Vote Signing, Blob Encoding & Settlement Helpers",
+  "description": "TypeScript SDK for Therdal Protocol (Stage 1: Topic Creation) — Validation, Content Hashing & Contract ABIs",
   "type": "module",
   "main": "src/index.ts",
+  "scripts": {
+    "test": "node --test test/topic.test.ts"
+  },
   "license": "MIT"
 }

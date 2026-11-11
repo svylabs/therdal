@@ -1,7 +1,8 @@
 {
   "name": "@therdal/frontend",
-  "version": "0.2.0",
-  "description": "Therdal Interactive Protocol App — A Permissionless and Verifiable Stakeholder Signaling Protocol for Ethereum",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Therdal Interactive Protocol App (Stage 1: Topic Creation & Registry)",
   "scripts": {
     "start": "python3 -m http.server 4173 --directory .."
   },
