@@ -8,3 +8,6 @@
 /website/node_modules
 .DS_Store
 *.sqlite
+.therdal-devnet.json
+.therdal-topics.json
+.therdal-votes.json

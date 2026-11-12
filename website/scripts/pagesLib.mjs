@@ -195,6 +195,12 @@ export function buildNotFoundHtml({ domain = DEFAULT_CUSTOM_DOMAIN } = {}) {
       color: #d6e3ff;
       border: 1px solid rgba(170, 199, 255, 0.22);
     }
+    .btn-disabled {
+      background: rgba(170, 199, 255, 0.06);
+      color: rgba(214, 227, 255, 0.56);
+      border: 1px solid rgba(170, 199, 255, 0.16);
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -203,12 +209,12 @@ export function buildNotFoundHtml({ domain = DEFAULT_CUSTOM_DOMAIN } = {}) {
     <h1>Page not found</h1>
     <p>
       The page you requested does not exist on <strong>${escapeHtml(normalized || "Therdal")}</strong>.
-      Explore the protocol overview, documentation, or interactive voting app below.
+      Explore the protocol overview or documentation below.
     </p>
     <div class="actions">
       <a href="/" class="btn btn-primary" data-root-link="">Protocol Home</a>
       <a href="/docs.html" class="btn btn-secondary" data-root-link="docs.html">Documentation</a>
-      <a href="/frontend/index.html" class="btn btn-secondary" data-root-link="frontend/index.html">Launch App</a>
+      <span class="btn btn-disabled" aria-disabled="true">Launch App · Coming Soon</span>
     </div>
   </main>
   <script>
@@ -228,6 +234,116 @@ export function buildNotFoundHtml({ domain = DEFAULT_CUSTOM_DOMAIN } = {}) {
 `;
 }
 
+/**
+ * Generates a dedicated "Coming Soon" placeholder page for `/app/` and `/frontend/`
+ * in the public GitHub Pages bundle so direct visits also show "Coming Soon".
+ */
+export function buildComingSoonAppHtml() {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Coming Soon — Therdal App</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg?v=2" />
+  <link rel="shortcut icon" href="../assets/favicon.ico?v=2" />
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: radial-gradient(circle at 50% 0%, #182338 0%, #0d1017 62%);
+      color: #e4e8f2;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .card {
+      max-width: 520px;
+      width: 100%;
+      background: #151923;
+      border: 1px solid rgba(170, 199, 255, 0.16);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(170, 199, 255, 0.14);
+      color: #aac7ff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      margin: 0 0 0.75rem;
+      font-size: 1.85rem;
+      letter-spacing: -0.02em;
+    }
+    p {
+      margin: 0 0 1.75rem;
+      color: #9aa5bd;
+      line-height: 1.6;
+      font-size: 0.98rem;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.7rem 1.25rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: #aac7ff;
+      color: #0b1b36;
+    }
+    .btn-secondary {
+      background: rgba(170, 199, 255, 0.12);
+      color: #d6e3ff;
+      border: 1px solid rgba(170, 199, 255, 0.22);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="badge">Coming Soon</div>
+    <h1>Therdal App is Coming Soon</h1>
+    <p>
+      The public web application for permissionless Ethereum stakeholder signaling is currently under preparation.
+      Read the protocol specification and operator guides in the meantime.
+    </p>
+    <div class="actions">
+      <a href="../index.html" class="btn btn-primary">← Protocol Home</a>
+      <a href="../docs.html" class="btn btn-secondary">Read Documentation</a>
+    </div>
+  </main>
+</body>
+</html>
+`;
+}
+
 export function buildRobotsTxt({ domain = DEFAULT_CUSTOM_DOMAIN } = {}) {
   const normalized = normalizeCustomDomain(domain);
   const lines = ["User-agent: *", "Allow: /"];
@@ -240,7 +356,7 @@ export function buildRobotsTxt({ domain = DEFAULT_CUSTOM_DOMAIN } = {}) {
 export function buildSitemapXml({ domain = DEFAULT_CUSTOM_DOMAIN } = {}) {
   const normalized = normalizeCustomDomain(domain);
   const base = normalized ? `https://${normalized}` : "https://therdal.org";
-  const urls = [`${base}/`, `${base}/docs.html`, `${base}/frontend/`];
+  const urls = [`${base}/`, `${base}/docs.html`];
   const entries = urls.map((u) => `  <url>\n    <loc>${escapeHtml(u)}</loc>\n  </url>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -321,7 +437,6 @@ export function assemblePagesBundle({
   const normalizedDomain = normalizeCustomDomain(customDomain);
 
   const websiteDir = path.join(repoRoot, "website");
-  const frontendDir = path.join(repoRoot, "frontend");
   const requiredSources = [
     path.join(websiteDir, "index.html"),
     path.join(websiteDir, "docs.html"),
@@ -329,8 +444,6 @@ export function assemblePagesBundle({
     path.join(websiteDir, "src", "material-v11.css"),
     path.join(websiteDir, "src", "material-v12.js"),
     path.join(websiteDir, "src", "docs-v10.js"),
-    path.join(frontendDir, "index.html"),
-    path.join(frontendDir, "src", "app.js"),
   ];
 
   for (const srcFile of requiredSources) {
@@ -353,28 +466,19 @@ export function assemblePagesBundle({
   copyDirRecursive(path.join(websiteDir, "src"), path.join(outDir, "src"));
   fs.copyFileSync(path.join(websiteDir, "assets", "favicon.ico"), path.join(outDir, "favicon.ico"));
 
-  // 3. Interactive Protocol App (`/frontend/`)
+  // 3. "Coming Soon" placeholder routes for `/frontend/` and `/app/`
+  const comingSoonHtml = buildComingSoonAppHtml();
   fs.mkdirSync(path.join(outDir, "frontend"), { recursive: true });
-  const rawFrontendHtml = fs.readFileSync(path.join(frontendDir, "index.html"), "utf8");
-  fs.writeFileSync(
-    path.join(outDir, "frontend", "index.html"),
-    rewriteFrontendHtmlForPages(rawFrontendHtml),
-    "utf8"
-  );
-  copyDirRecursive(path.join(frontendDir, "src"), path.join(outDir, "frontend", "src"));
+  fs.writeFileSync(path.join(outDir, "frontend", "index.html"), comingSoonHtml, "utf8");
 
-  // 4. Clean route aliases (`/docs/`, `/app/`) & backward-compatible `/website/*` routes
+  fs.mkdirSync(path.join(outDir, "app"), { recursive: true });
+  fs.writeFileSync(path.join(outDir, "app", "index.html"), comingSoonHtml, "utf8");
+
+  // 4. Clean route alias (`/docs/`) & backward-compatible `/website/*` routes
   fs.mkdirSync(path.join(outDir, "docs"), { recursive: true });
   fs.writeFileSync(
     path.join(outDir, "docs", "index.html"),
     buildRedirectHtml({ target: "../docs.html", title: "Therdal Documentation" }),
-    "utf8"
-  );
-
-  fs.mkdirSync(path.join(outDir, "app"), { recursive: true });
-  fs.writeFileSync(
-    path.join(outDir, "app", "index.html"),
-    buildRedirectHtml({ target: "../frontend/index.html", title: "Therdal App" }),
     "utf8"
   );
 
@@ -423,8 +527,6 @@ export function validateBuiltPagesBundle(outDir, { expectedDomain = DEFAULT_CUST
     "src/material-v12.js",
     "src/docs-v10.js",
     "frontend/index.html",
-    "frontend/src/app.js",
-    "frontend/src/styles.css",
     "docs/index.html",
     "app/index.html",
     "website/index.html",

@@ -61,7 +61,21 @@ cargo test --offline
 cd sdk && npm test
 ```
 
-### 4. Register a Topic & Cast Direct Snapshot Votes via CLI
+### 4. Start a Local Ethereum Devnet (Stake, EOA & Smart Account Voting)
+```bash
+# Start persistent local Anvil node (http://127.0.0.1:8545) seeded with EIP-4788/2935,
+# USDC, Therdal, Smart Accounts (50 ETH & 120 ETH), and 0x01/0x02 Validator Stakes
+npm run devnet:start
+
+# Run live multi-actor voting showcase (EOA + 0x01/0x02 Stake + Direct & Bundler-Relayed Smart Accounts)
+npm run devnet:demo
+
+# Run self-contained ephemeral Anvil E2E test suite
+npm run devnet:smoke
+```
+See [`docs/local-testing.md`](docs/local-testing.md) for the full devnet topology, Smart Account & validator recipes, and Ethereum testing best practices.
+
+### 5. Register a Topic & Cast Direct Snapshot Votes via CLI
 ```bash
 # Generate deterministic RLP/MPT + Beacon SSZ snapshot fixture for voter + validator #42
 cargo run --offline --bin therdal-cli -- generate-proof-fixture \
@@ -82,7 +96,7 @@ cargo run --offline --bin therdal-cli -- vote-direct \
 cargo run --offline --bin therdal-cli -- tallies --topic-id 1
 ```
 
-### 5. Launch & Deploy the Website (`therdal.org` · GitHub Pages)
+### 6. Launch & Deploy the Website (`therdal.org` · GitHub Pages)
 ```bash
 # Local development server
 python3 -m http.server 4173

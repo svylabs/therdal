@@ -11,6 +11,9 @@ interface Vm {
     function warp(uint256 newTimestamp) external;
     function roll(uint256 newBlockNumber) external;
     function prank(address msgSender) external;
+    function deal(address who, uint256 newBalance) external;
+    function addr(uint256 privateKey) external pure returns (address);
+    function sign(uint256 privateKey, bytes32 digest) external pure returns (uint8 v, bytes32 r, bytes32 s);
     function setBlockhash(uint256 blockNumber, bytes32 blockHash) external;
     function etch(address target, bytes calldata newRuntimeBytecode) external;
     function chainId(uint256 newChainId) external;

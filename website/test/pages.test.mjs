@@ -106,10 +106,11 @@ test("buildRobotsTxt, buildSitemapXml, and buildNotFoundHtml configure therdal.o
   const sitemap = buildSitemapXml({ domain: "therdal.org" });
   assert.match(sitemap, /<loc>https:\/\/therdal\.org\/<\/loc>/);
   assert.match(sitemap, /<loc>https:\/\/therdal\.org\/docs\.html<\/loc>/);
-  assert.match(sitemap, /<loc>https:\/\/therdal\.org\/frontend\/<\/loc>/);
+  assert.doesNotMatch(sitemap, /\/frontend\//);
 
   const notFound = buildNotFoundHtml({ domain: "therdal.org" });
   assert.match(notFound, /404 — Page Not Found/);
+  assert.match(notFound, /Launch App · Coming Soon/);
   assert.match(notFound, /therdal\.org/);
 });
 
@@ -138,9 +139,25 @@ test("assemblePagesBundle builds complete bundle for therdal.org and detects bro
 
     assert.equal(summary.domain, "therdal.org");
     assert.ok(summary.htmlFileCount >= 8);
-    assert.ok(summary.checkedLinks >= 50);
+    assert.ok(summary.checkedLinks >= 40);
     assert.equal(fs.readFileSync(path.join(tmpOut, "CNAME"), "utf8"), "therdal.org\n");
     assert.equal(fs.existsSync(path.join(tmpOut, ".nojekyll")), true);
+
+    // Verify all "Launch App" controls are Coming Soon and zero active frontend links exist on homepage/docs
+    const builtHome = fs.readFileSync(path.join(tmpOut, "index.html"), "utf8");
+    const builtDocs = fs.readFileSync(path.join(tmpOut, "docs.html"), "utf8");
+    const builtApp = fs.readFileSync(path.join(tmpOut, "app", "index.html"), "utf8");
+    assert.match(builtHome, /Coming Soon/);
+    assert.match(builtDocs, /Coming Soon/);
+    assert.match(builtApp, /Therdal App is Coming Soon/);
+    assert.doesNotMatch(builtHome, /href="[^"]*frontend\//);
+    assert.doesNotMatch(builtDocs, /href="[^"]*frontend\//);
+
+    // Verify responsive mobile header menu controls exist on both homepage and docs portal
+    assert.match(builtHome, /id="mobileMenuBtn"/);
+    assert.match(builtHome, /id="mobileNavMenu"/);
+    assert.match(builtDocs, /id="mobileMenuBtn"/);
+    assert.match(builtDocs, /id="mobileNavMenu"/);
 
     // Tamper with CNAME and assert validator catches it
     fs.writeFileSync(path.join(tmpOut, "CNAME"), "wrong-domain.org\n", "utf8");

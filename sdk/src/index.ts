@@ -12,6 +12,7 @@ export { bytesToHex, keccak256Bytes };
 export * from "./sha256.ts";
 export * from "./rlp.ts";
 export * from "./voting.ts";
+export * from "./rpcProofs.ts";
 
 export const MIN_TOPIC_OPTIONS = 2;
 export const MAX_TOPIC_OPTIONS = 16;

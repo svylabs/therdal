@@ -11,7 +11,11 @@
     "website:deploy": "node ./website/scripts/deploy-pages.mjs",
     "website:deploy:dry-run": "node ./website/scripts/deploy-pages.mjs --dry-run",
     "website:test": "node --test ./website/test/pages.test.mjs",
-    "sdk:test": "npm --prefix ./sdk test"
+    "sdk:test": "npm --prefix ./sdk test",
+    "devnet:start": "node ./script/devnet/local-devnet.mjs start",
+    "devnet:seed": "node ./script/devnet/local-devnet.mjs seed",
+    "devnet:demo": "node ./script/devnet/local-devnet.mjs demo",
+    "devnet:smoke": "node --test ./script/devnet/devnet-e2e.test.mjs"
   },
   "license": "MIT"
 }

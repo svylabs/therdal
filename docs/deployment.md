@@ -13,8 +13,8 @@ Running `npm run website:build` assembles and validates `website/dist/`:
 | `index.html` | `https://therdal.org/` | Protocol homepage (Material Design 3 dark theme) |
 | `docs.html` | `https://therdal.org/docs.html` | Two-pane protocol & operator documentation portal |
 | `docs/index.html` | `https://therdal.org/docs/` | Clean alias redirecting to `/docs.html` (preserves `#hash`) |
-| `frontend/` | `https://therdal.org/frontend/` | Interactive Stage 1–2 Topic Registry & Direct Snapshot Voting app |
-| `app/index.html` | `https://therdal.org/app/` | Clean alias redirecting to `/frontend/index.html` (preserves `#hash`) |
+| `app/index.html` | `https://therdal.org/app/` | "Therdal App — Coming Soon" placeholder page |
+| `frontend/index.html` | `https://therdal.org/frontend/` | "Therdal App — Coming Soon" placeholder page |
 | `website/*` | `https://therdal.org/website/*` | Backward-compatible redirects to `/` and `/docs.html` |
 | `CNAME` | `therdal.org` | Custom domain declaration for GitHub Pages |
 | `.nojekyll` | — | Disables Jekyll processing on GitHub Pages |
@@ -71,15 +71,14 @@ node website/scripts/build-pages.mjs --no-cname
 
 ## 3. GitHub Pages Configuration (`svylabs/therdal`)
 
-You can host `therdal.org` via either **GitHub Actions** (recommended automatic CI/CD) or the **`gh-pages` branch**:
+GitHub Pages is configured to serve from the **`gh-pages`** branch (`/` root) under **`therdal.org`**:
 
-### Option A: Automatic Deployment via GitHub Actions (Recommended)
-1. In GitHub repository **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**.
-2. Pushing changes to `main` (or triggering **Actions → Deploy Therdal Website to GitHub Pages → Run workflow**) automatically runs `.github/workflows/deploy-pages.yml`, executes `npm run website:test` and `npm run website:build`, and deploys `website/dist/`.
-
-### Option B: CLI Branch Deployment (`gh-pages`)
-1. Run `npm run website:deploy` locally to publish `website/dist/` to `origin/gh-pages`.
-2. In GitHub repository **Settings → Pages → Build and deployment**, set **Source** to **Deploy from a branch**, select **`gh-pages`** and **`/ (root)`**, and click **Save**.
+1. **GitHub Settings (`Settings → Pages → Build and deployment`)**:
+   - **Source**: **Deploy from a branch** → **`gh-pages`** / **`/ (root)`**.
+2. **Automatic CI/CD on `main` (`.github/workflows/deploy-pages.yml`)**:
+   - Pushing website or frontend changes to `main` (or running the workflow manually) executes `npm run website:test` and `npm run website:deploy`, updating `origin/gh-pages` automatically.
+3. **Manual CLI Deployment**:
+   - Run `npm run website:deploy` locally at any time to publish directly to `origin/gh-pages`.
 
 ---
 

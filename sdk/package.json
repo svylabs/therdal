@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "test": "node --test test/topic.test.ts test/voting.test.ts"
+    "test": "node --test test/topic.test.ts test/voting.test.ts test/rpcProofs.test.ts"
   },
   "license": "MIT"
 }

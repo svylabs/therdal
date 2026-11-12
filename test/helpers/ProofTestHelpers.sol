@@ -132,11 +132,26 @@ library RlpEncoderHelper {
         uint256 nonce,
         uint256 balanceWei
     ) internal pure returns (bytes memory) {
+        return
+            encodeCustomAccountLeafValue(
+                nonce,
+                balanceWei,
+                keccak256("empty_storage_root"),
+                keccak256("empty_code_hash")
+            );
+    }
+
+    function encodeCustomAccountLeafValue(
+        uint256 nonce,
+        uint256 balanceWei,
+        bytes32 storageRoot,
+        bytes32 codeHash
+    ) internal pure returns (bytes memory) {
         bytes[] memory fields = new bytes[](4);
         fields[0] = encodeUint(nonce);
         fields[1] = encodeUint(balanceWei);
-        fields[2] = encodeBytes32(keccak256("empty_storage_root"));
-        fields[3] = encodeBytes32(keccak256("empty_code_hash"));
+        fields[2] = encodeBytes32(storageRoot);
+        fields[3] = encodeBytes32(codeHash);
         return encodeList(fields);
     }
 
@@ -195,10 +210,35 @@ library RlpEncoderHelper {
         uint256 nonce,
         uint256 balanceWei
     ) internal pure returns (bytes32 stateRoot, bytes memory rlpProofNodes) {
+        return
+            buildCustomAccountTrie(
+                account,
+                nonce,
+                balanceWei,
+                keccak256("empty_storage_root"),
+                keccak256("empty_code_hash")
+            );
+    }
+
+    /**
+     * @notice Builds a single-leaf MPT state trie for an EOA or Smart Account with explicit `storageRoot` and `codeHash`.
+     */
+    function buildCustomAccountTrie(
+        address account,
+        uint256 nonce,
+        uint256 balanceWei,
+        bytes32 storageRoot,
+        bytes32 codeHash
+    ) internal pure returns (bytes32 stateRoot, bytes memory rlpProofNodes) {
         bytes32 keyHash = keccak256(abi.encodePacked(account));
         bytes memory fullNibbles = toNibbles(keyHash);
         bytes memory hp = encodeCompactPath(fullNibbles, true);
-        bytes memory accountVal = encodeAccountLeafValue(nonce, balanceWei);
+        bytes memory accountVal = encodeCustomAccountLeafValue(
+            nonce,
+            balanceWei,
+            storageRoot,
+            codeHash
+        );
 
         bytes[] memory leafFields = new bytes[](2);
         leafFields[0] = encodeBytes(hp);
