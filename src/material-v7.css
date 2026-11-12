@@ -194,6 +194,78 @@ body {
   filter: brightness(1.1);
 }
 
+/* M3 Disabled / Coming Soon App Button */
+.md-btn-soon {
+  background: rgba(170, 199, 255, 0.08);
+  color: rgba(226, 230, 240, 0.72);
+  border: 1px solid rgba(170, 199, 255, 0.2);
+  cursor: not-allowed;
+  user-select: none;
+  gap: 0.55rem;
+}
+
+.md-btn-soon:hover,
+.md-btn-soon:focus-visible {
+  background: rgba(170, 199, 255, 0.11);
+  border-color: rgba(170, 199, 255, 0.32);
+  box-shadow: none;
+  filter: none;
+}
+
+.md-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.52rem;
+  border-radius: var(--radius-pill);
+  background: rgba(170, 199, 255, 0.16);
+  color: var(--md-primary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.md-btn-soon.soon-pulse .md-soon-badge {
+  transform: scale(1.06);
+  background: rgba(170, 199, 255, 0.28);
+}
+
+.footer-soon-item {
+  color: rgba(196, 198, 208, 0.56);
+  font-size: 0.9rem;
+  cursor: not-allowed;
+  user-select: none;
+}
+
+.coming-soon-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translate(-50%, 16px);
+  z-index: 9999;
+  padding: 0.68rem 1.2rem;
+  border-radius: var(--radius-pill);
+  background: #1e2535;
+  color: #eef3ff;
+  border: 1px solid rgba(170, 199, 255, 0.32);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.48);
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.coming-soon-toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 /* M3 Cards */
 .md-card {
   border-radius: var(--radius-lg);

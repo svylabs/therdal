@@ -432,4 +432,41 @@
       }
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // 6. Non-Navigating "Launch App — Coming Soon" Feedback
+  // ---------------------------------------------------------------------------
+  let soonToastTimer = null;
+
+  function showComingSoonToast() {
+    let toast = document.getElementById("comingSoonToast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "comingSoonToast";
+      toast.className = "coming-soon-toast";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      toast.textContent = "Therdal App — Coming Soon";
+      document.body.appendChild(toast);
+    }
+    requestAnimationFrame(function () {
+      toast.classList.add("visible");
+    });
+    if (soonToastTimer) clearTimeout(soonToastTimer);
+    soonToastTimer = setTimeout(function () {
+      toast.classList.remove("visible");
+    }, 2200);
+  }
+
+  document.querySelectorAll("[data-coming-soon]").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      el.classList.add("soon-pulse");
+      setTimeout(function () {
+        el.classList.remove("soon-pulse");
+      }, 260);
+      showComingSoonToast();
+    });
+  });
 })();

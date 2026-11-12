@@ -87,6 +87,12 @@
       color: #d6e3ff;
       border: 1px solid rgba(170, 199, 255, 0.22);
     }
+    .btn-disabled {
+      background: rgba(170, 199, 255, 0.06);
+      color: rgba(214, 227, 255, 0.56);
+      border: 1px solid rgba(170, 199, 255, 0.16);
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -95,12 +101,12 @@
     <h1>Page not found</h1>
     <p>
       The page you requested does not exist on <strong>therdal.org</strong>.
-      Explore the protocol overview, documentation, or interactive voting app below.
+      Explore the protocol overview or documentation below.
     </p>
     <div class="actions">
       <a href="/" class="btn btn-primary" data-root-link="">Protocol Home</a>
       <a href="/docs.html" class="btn btn-secondary" data-root-link="docs.html">Documentation</a>
-      <a href="/frontend/index.html" class="btn btn-secondary" data-root-link="frontend/index.html">Launch App</a>
+      <span class="btn btn-disabled" aria-disabled="true">Launch App · Coming Soon</span>
     </div>
   </main>
   <script>
